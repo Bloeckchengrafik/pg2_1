@@ -2,3 +2,12 @@ cmake-build-debug
 build
 .idea
 *.iml
+# Devenv
+.devenv*
+devenv.local.nix
+
+# direnv
+.direnv
+
+# pre-commit
+.pre-commit-config.yaml
