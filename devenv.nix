@@ -7,6 +7,7 @@
   packages = [
     pkgs.git
     pkgs.nlohmann_json
+    pkgs.qt6.full
   ];
 
   languages.cplusplus.enable = true;

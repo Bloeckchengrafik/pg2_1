@@ -11,7 +11,8 @@ class TravelAgency {
 public:
     TravelAgency() = default;
 
-    std::optional<std::string> readJsonFile(const std::string &name);
-    void readBinaryFile(const std::string &name);
+    std::string readJsonFile(const std::string &name);
+    std::string readBinaryFile(const std::string &name);
     void printBookings() const;
+    std::vector<Booking*>& getBookings();
 };

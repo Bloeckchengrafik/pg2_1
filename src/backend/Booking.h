@@ -1,7 +1,10 @@
 #pragma once
+#include <QWidget>
 #include <string>
 #include <utility>
 #include <vector>
+
+QDate parseDate(const std::string &date);
 
 class Booking {
 protected:
@@ -23,10 +26,21 @@ public:
 
     virtual std::string showDetails() = 0;
 
+    virtual void showEditor() = 0;
+
     double getPrice() const;
+
+    std::string &getFromDate() {
+        return fromDate;
+    }
+
+    std::string &getToDate() {
+        return toDate;
+    }
 };
 
 class RentalCarReservation final : public Booking {
+    friend class RentalCarUi;
     std::string pickupLocation;
     std::string returnLocation;
     std::string company;
@@ -47,9 +61,25 @@ public:
     }
 
     std::string showDetails() override;
+
+    void showEditor() override;
+
+    std::string &getPickupLocation() {
+        return pickupLocation;
+    }
+
+    std::string &getReturnLocation() {
+        return returnLocation;
+    }
+
+    std::string &getCompany() {
+        return company;
+    }
 };
 
 class HotelBooking final : public Booking {
+    friend class HotelBookingUi;
+
     std::string hotel;
     std::string town;
 
@@ -67,9 +97,21 @@ public:
     }
 
     std::string showDetails() override;
+
+    void showEditor() override;
+
+    std::string &getHotel() {
+        return hotel;
+    }
+
+    std::string &getTown() {
+        return town;
+    }
 };
 
 class FlightBooking final : public Booking {
+    friend class FlightBookingUi;
+
     std::string fromDestination;
     std::string toDestination;
     std::string airline;
@@ -90,9 +132,25 @@ public:
     }
 
     std::string showDetails() override;
+
+    void showEditor() override;
+
+    std::string &getFromDestination() {
+        return fromDestination;
+    }
+
+    std::string &getToDestination() {
+        return toDestination;
+    }
+
+    std::string &getAirline() {
+        return airline;
+    }
 };
 
 class TrainTicket final : public Booking {
+    friend class TrainTicketUi;
+
     std::string fromStation;
     std::string toStation;
     std::string arrivalTime;
@@ -119,4 +177,26 @@ public:
     }
 
     std::string showDetails() override;
+
+    void showEditor() override;
+
+    std::string &getFromStation() {
+        return fromStation;
+    }
+
+    std::string &getToStation() {
+        return toStation;
+    }
+
+    std::string &getArrivalTime() {
+        return arrivalTime;
+    }
+
+    std::string &getDepartureTime() {
+        return departureTime;
+    }
+
+    std::vector<std::string> &getConnectingStations() {
+        return connectingStations;
+    }
 };

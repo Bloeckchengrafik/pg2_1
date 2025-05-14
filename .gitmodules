@@ -1,0 +1,6 @@
+[submodule "vendor/material"]
+	path = vendor/material
+	url = https://github.com/githubuser0xFFFF/Qt-Advanced-Stylesheets
+[submodule "vendor/QDarkStyleSheet"]
+	path = vendor/QDarkStyleSheet
+	url = https://github.com/ColinDuquesnoy/QDarkStyleSheet.git
