@@ -66,8 +66,18 @@ void printMetadata(const std::vector<Booking *> &bookings) {
             << countTrain << " Zugbuchungen im Wert von " << priceTrain << "€, angelegt" << std::endl;
 }
 
+TravelAgency::~TravelAgency() {
+    for (Booking* booking : bookings) {
+        delete booking;
+    }
+    bookings.clear();
+}
+
 std::optional<std::string> TravelAgency::readJsonFile(const std::string &name) {
     std::ifstream file(name);
+    if (!file.is_open()) {
+        throw std::runtime_error("file not found");
+    }
     std::vector<Booking *> bookings;
     int objCount = 0;
     for (const json data = json::parse(file); json obj: data) {

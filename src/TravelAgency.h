@@ -10,6 +10,8 @@ class TravelAgency {
 
 public:
     TravelAgency() = default;
+    ~TravelAgency();
+
 
     std::optional<std::string> readJsonFile(const std::string &name);
     void readBinaryFile(const std::string &name);
