@@ -33,7 +33,7 @@ double assertNotNan(const double d, const std::string &message) {
     return d;
 }
 
-void printMetadata(const std::vector<Booking *> &bookings) {
+std::string getMetadata(const std::vector<Booking *> &bookings) {
     double priceFlight = 0;
     double priceRentalCar = 0;
     double priceHotel = 0;
@@ -60,10 +60,13 @@ void printMetadata(const std::vector<Booking *> &bookings) {
         }
     }
 
-    std::cout << "Es wurden " << countFlight << " Flugbuchungen im Wert von " << priceFlight << "€, "
+    std::stringstream out;
+    out << "Es wurden " << countFlight << " Flugbuchungen im Wert von " << priceFlight << "€, "
             << countRentalCar << " Mietwagenbuchungen im Wert von " << priceRentalCar << "€, "
             << countHotel << " Hotelreservierungen im Wert von " << priceHotel << "€ und "
-            << countTrain << " Zugbuchungen im Wert von " << priceTrain << "€, angelegt" << std::endl;
+            << countTrain << " Zugbuchungen im Wert von " << priceTrain << "€, angelegt";
+
+    return out.str();
 }
 
 TravelAgency::~TravelAgency() {
@@ -73,7 +76,7 @@ TravelAgency::~TravelAgency() {
     bookings.clear();
 }
 
-std::optional<std::string> TravelAgency::readJsonFile(const std::string &name) {
+std::string TravelAgency::readJsonFile(const std::string &name) {
     std::ifstream file(name);
     if (!file.is_open()) {
         throw std::runtime_error("file not found");
@@ -146,17 +149,16 @@ std::optional<std::string> TravelAgency::readJsonFile(const std::string &name) {
             for (auto &booking: bookings) {
                 delete booking;
             }
-            return out.str();
+            throw std::runtime_error(out.str());
         }
     }
 
-    printMetadata(bookings);
+    const auto metadata = getMetadata(bookings);
     this->bookings.insert(this->bookings.end(), bookings.begin(), bookings.end());
-
-    return std::nullopt;
+    return metadata;
 }
 
-void TravelAgency::readBinaryFile(const std::string &name) {
+std::string TravelAgency::readBinaryFile(const std::string &name) {
     BinaryFormatReader formatReader(name);
     std::vector<Booking *> bookings;
     while (!formatReader.isAtEnd()) {
@@ -233,12 +235,17 @@ void TravelAgency::readBinaryFile(const std::string &name) {
         }
     }
 
-    printMetadata(bookings);
+    const auto meta = getMetadata(bookings);
     this->bookings.insert(this->bookings.end(), bookings.begin(), bookings.end());
+    return meta;
 }
 
 void TravelAgency::printBookings() const {
     for (const auto booking: this->bookings) {
         std::cout << booking->showDetails() << std::endl;
     }
+}
+
+std::vector<Booking *> & TravelAgency::getBookings() {
+    return this->bookings;
 }
