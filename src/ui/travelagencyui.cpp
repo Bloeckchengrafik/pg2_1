@@ -31,11 +31,9 @@ void TravelAgencyUi::onReadInFile() {
     dialog.setViewMode(QFileDialog::Detail);
     dialog.setMimeTypeFilters(QStringList{
         "application/json",
-        "application/octet-stream"
     });
     dialog.setNameFilters(QStringList{
         "JSON files (*.json)",
-        "Binary files (*.bin)"
     });
 
     if (dialog.exec() == QDialog::Accepted) {
@@ -44,9 +42,7 @@ void TravelAgencyUi::onReadInFile() {
 
         try {
             if (fileInfo.suffix() == "json") {
-                readFile(&TravelAgency::readJsonFile, selectedFile.toStdString());
-            } else if (fileInfo.suffix() == "bin") {
-                readFile(&TravelAgency::readBinaryFile, selectedFile.toStdString());
+                readFile(&TravelAgency::readFile, selectedFile.toStdString());
             } else {
                 QMessageBox::critical(this, "Error", "Unknown file type");
             }

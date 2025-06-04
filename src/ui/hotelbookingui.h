@@ -7,8 +7,8 @@
 
 #include <QWidget>
 
+#include "../backend/booking/HotelBooking.h"
 
-class HotelBooking;
 QT_BEGIN_NAMESPACE
 namespace Ui { class HotelBookingUi; }
 QT_END_NAMESPACE

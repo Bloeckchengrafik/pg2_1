@@ -3,18 +3,23 @@
 #include <string>
 #include <vector>
 
-#include "Booking.h"
+#include "booking/Booking.h"
+#include "Customer.h"
 
 class TravelAgency {
-    std::vector<Booking*> bookings{};
+    std::vector<Booking*> allBookings{};
+    std::vector<Customer*> allCustomers{};
+    std::vector<Travel*> allTravels{};
 
 public:
     TravelAgency() = default;
     ~TravelAgency();
 
-
-    std::string readJsonFile(const std::string &name);
-    std::string readBinaryFile(const std::string &name);
+    std::string readFile(const std::string &name);
     void printBookings() const;
     std::vector<Booking*>& getBookings();
+
+    std::optional<Booking*> findBooking(const std::string &id);
+    std::optional<Customer*> findCustomer(long id);
+    std::optional<Travel*> findTravel(long id);
 };

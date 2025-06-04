@@ -6,7 +6,7 @@
 
 #include "hotelbookingui.h"
 #include "ui_hotelbookingui.h"
-#include "../backend/Booking.h"
+#include "../backend/booking/Booking.h"
 
 
 HotelBookingUi::HotelBookingUi(HotelBooking* booking, QWidget *parent) :

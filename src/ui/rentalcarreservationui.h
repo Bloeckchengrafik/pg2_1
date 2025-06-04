@@ -5,7 +5,7 @@
 #ifndef RENTALCARRESERVATIONUI_H
 #define RENTALCARRESERVATIONUI_H
 
-#include "../backend/Booking.h"
+#include "../backend/booking/RentalCarReservation.h"
 
 
 QT_BEGIN_NAMESPACE

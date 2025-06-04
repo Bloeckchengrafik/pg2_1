@@ -5,7 +5,7 @@
 #ifndef TRAINTICKETUI_H
 #define TRAINTICKETUI_H
 
-#include "../backend/Booking.h"
+#include "../backend/booking/TrainTicket.h"
 
 
 QT_BEGIN_NAMESPACE

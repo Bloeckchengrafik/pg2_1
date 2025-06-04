@@ -6,7 +6,7 @@
 
 #include "trainticketui.h"
 #include "ui_trainticketui.h"
-#include "../backend/Booking.h"
+#include "../backend/booking/Booking.h"
 #include <QStringListModel>
 
 TrainTicketUi::TrainTicketUi(TrainTicket *booking, QWidget *parent) :

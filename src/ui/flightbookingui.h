@@ -7,7 +7,7 @@
 
 #include <QWidget>
 
-#include "../backend/Booking.h"
+#include "../backend/booking/FlightBooking.h"
 
 
 QT_BEGIN_NAMESPACE

@@ -6,7 +6,7 @@
 
 #include "rentalcarreservationui.h"
 #include "ui_rentalcarreservationui.h"
-#include "../backend/Booking.h"
+#include "../backend/booking/Booking.h"
 
 
 RentalCarReservationUi::RentalCarReservationUi(RentalCarReservation *res, QWidget *parent) :
