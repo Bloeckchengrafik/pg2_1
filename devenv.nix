@@ -8,6 +8,8 @@
     pkgs.git
     pkgs.nlohmann_json
     pkgs.qt6.full
+    pkgs.xcb-util-cursor
+    pkgs.xorg.xorgserver
   ];
 
   languages.cplusplus.enable = true;
