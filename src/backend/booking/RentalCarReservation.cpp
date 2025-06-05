@@ -24,6 +24,18 @@ std::string &RentalCarReservation::getCompany() {
     return company;
 }
 
+void RentalCarReservation::setPickupLocation(std::string pickupLocation) {
+    this->pickupLocation = std::move(pickupLocation);
+}
+
+void RentalCarReservation::setReturnLocation(std::string returnLocation) {
+    this->returnLocation = std::move(returnLocation);
+}
+
+void RentalCarReservation::setCompany(std::string company) {
+    this->company = std::move(company);
+}
+
 QIcon RentalCarReservation::getIcon() {
     return QIcon(":/icons/car-profile.svg");
 }
@@ -42,8 +54,8 @@ std::string RentalCarReservation::showDetails() {
     return out.str();
 }
 
-void RentalCarReservation::showEditor() {
-    const auto ui = new RentalCarReservationUi(this);
+void RentalCarReservation::showEditor(ChangeController *changeController) {
+    const auto ui = new RentalCarReservationUi(this, changeController);
     ui->show();
 }
 

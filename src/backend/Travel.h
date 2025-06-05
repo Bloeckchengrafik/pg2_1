@@ -27,6 +27,8 @@ public:
     std::string getStart();
 
     std::string getEnd();
+
+    void serializeAll(nlohmann::json &json, serde::Encoder* encoder);
 };
 
 template<>

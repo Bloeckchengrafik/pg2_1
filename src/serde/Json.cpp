@@ -28,18 +28,40 @@ serde::Encoder *serde::json::JsonEncoder::key(const std::string &key) {
         json = nlohmann::json::object();
     }
     
-    auto *encoder = new JsonEncoder();
+    auto *encoder = new JsonEncoder(this, key);
     children.push_back(encoder);
     json[key] = encoder->json;
     return encoder;
 }
 
 nlohmann::json &serde::json::JsonEncoder::getJson() {
+    for (const auto child : children) child->finish();
     return json;
 }
 
 void serde::json::JsonEncoder::encodeLong(long value) {
     json = value;
+}
+
+serde::Encoder * serde::json::JsonEncoder::clone() {
+    for (const auto child : children) child->finish();
+    auto *encoder = new JsonEncoder();
+    encoder->json = json;
+    return encoder;
+}
+
+void serde::json::JsonEncoder::finish() {
+    for (const auto child : children) child->finish();
+    children.clear();
+
+    if (parent == nullptr || parentKey == std::nullopt) {
+        printf("warn: parent null");
+        return;
+    }
+
+    parent->json[parentKey.value()] = json;
+    parent = nullptr;
+    parentKey = std::nullopt;
 }
 
 serde::json::JsonDecoder::~JsonDecoder() {

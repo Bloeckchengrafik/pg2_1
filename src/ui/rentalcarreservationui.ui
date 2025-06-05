@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>461</width>
-    <height>362</height>
+    <width>375</width>
+    <height>346</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -41,7 +41,7 @@
       <item>
        <widget class="QLineEdit" name="companyName">
         <property name="readOnly">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
        </widget>
       </item>
@@ -78,7 +78,7 @@
          <item>
           <widget class="QDateEdit" name="pickupDate">
            <property name="readOnly">
-            <bool>true</bool>
+            <bool>false</bool>
            </property>
           </widget>
          </item>
@@ -100,7 +100,7 @@
          <item>
           <widget class="QLineEdit" name="pickupLocation">
            <property name="readOnly">
-            <bool>true</bool>
+            <bool>false</bool>
            </property>
           </widget>
          </item>
@@ -143,7 +143,7 @@
          <item>
           <widget class="QDateEdit" name="returnDate">
            <property name="readOnly">
-            <bool>true</bool>
+            <bool>false</bool>
            </property>
           </widget>
          </item>
@@ -165,7 +165,7 @@
          <item>
           <widget class="QLineEdit" name="returnLocation">
            <property name="readOnly">
-            <bool>true</bool>
+            <bool>false</bool>
            </property>
           </widget>
          </item>
@@ -186,14 +186,11 @@
      <property name="title">
       <string>Preis</string>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_6">
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
-       <widget class="QLineEdit" name="price">
-        <property name="frame">
-         <bool>true</bool>
-        </property>
-        <property name="readOnly">
-         <bool>true</bool>
+       <widget class="QDoubleSpinBox" name="price">
+        <property name="maximum">
+         <double>10000000.000000000000000</double>
         </property>
        </widget>
       </item>

@@ -24,3 +24,8 @@ Booking * serde_objects::Codec<Booking*>::deserialize(serde::Decoder *decoder) {
     if (type == "Train") return  Codec<TrainTicket*>::deserialize(decoder);
     return nullptr;
 }
+
+void serializeBooking(Booking *booking, serde::Encoder *encoder, nlohmann::json &json) {
+    serde_objects::Codec<Booking*>::serialize(booking, encoder);
+    json.push_back(static_cast<serde::json::JsonEncoder*>(encoder)->getJson());
+}

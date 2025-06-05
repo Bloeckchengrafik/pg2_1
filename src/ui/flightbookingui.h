@@ -6,6 +6,7 @@
 #define FLIGHTBOOKINGUI_H
 
 #include <QWidget>
+#include <QDate>
 
 #include "../backend/booking/FlightBooking.h"
 
@@ -18,11 +19,21 @@ class FlightBookingUi : public QWidget {
 Q_OBJECT
 
 public:
-    explicit FlightBookingUi(FlightBooking *booking, QWidget *parent = nullptr);
+    explicit FlightBookingUi(FlightBooking *booking, ChangeController *changeController, QWidget *parent = nullptr);
     ~FlightBookingUi() override;
+
+public slots:
+    void onSetFromStation(QString station);
+    void onSetToStation(QString station);
+    void onSetAirline(QString airline);
+    void onSetDate(QDate date);
+    void onSetPrice(double amount);
+    void onSetBookingClass(int index);
 
 private:
     Ui::FlightBookingUi *ui;
+    FlightBooking *booking;
+    ChangeController *changeController;
 };
 
 

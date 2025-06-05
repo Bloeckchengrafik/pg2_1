@@ -40,3 +40,15 @@ std::string &Booking::getToDate() {
     return toDate;
 }
 
+void Booking::setPrice(double price) {
+    this->price = price;
+}
+
+void Booking::setFromDate(std::string fromDate) {
+    this->fromDate = std::move(fromDate);
+}
+
+void Booking::setToDate(std::string toDate) {
+    this->toDate = std::move(toDate);
+}
+

@@ -42,7 +42,7 @@ public:
 
     std::string showDetails() override;
 
-    void showEditor() override;
+    void showEditor(ChangeController *changeController) override;
 
     std::string &getFromStation();
 
@@ -53,6 +53,13 @@ public:
     std::string &getDepartureTime();
 
     std::vector<std::string> &getConnectingStations();
+
+    void setConnectingStations(std::vector<std::string> connectingStations);
+    void setFromStation(std::string fromStation);
+    void setToStation(std::string toStation);
+    void setArrivalTime(std::string arrivalTime);
+    void setDepartureTime(std::string departureTime);
+    void setTicketType(TicketType ticketType);
 
     QIcon getIcon() override;
 

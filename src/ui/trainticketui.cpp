@@ -8,9 +8,11 @@
 #include "ui_trainticketui.h"
 #include "../backend/booking/Booking.h"
 #include <QStringListModel>
+#include <QInputDialog>
 
-TrainTicketUi::TrainTicketUi(TrainTicket *booking, QWidget *parent) :
-    QWidget(parent), ui(new Ui::TrainTicketUi) {
+TrainTicketUi::TrainTicketUi(TrainTicket *booking, ChangeController *changeController,
+                             QWidget *parent) : QWidget(parent), ui(new Ui::TrainTicketUi), booking(booking),
+                                                changeController(changeController) {
     ui->setupUi(this);
     ui->fromStation->setText(QString::fromStdString(booking->getFromStation()));
     ui->toStation->setText(QString::fromStdString(booking->getToStation()));
@@ -19,7 +21,7 @@ TrainTicketUi::TrainTicketUi(TrainTicket *booking, QWidget *parent) :
     ui->arrivalTime->setTime(QTime::fromString(QString::fromStdString(booking->getArrivalTime())));
 
     QStringList connectingStationList;
-    for (const auto& station : booking->getConnectingStations()) {
+    for (const auto &station: booking->getConnectingStations()) {
         connectingStationList.append(QString::fromStdString(station));
     }
 
@@ -35,9 +37,87 @@ TrainTicketUi::TrainTicketUi(TrainTicket *booking, QWidget *parent) :
     ui->type->addItem("Flexpreis 2. Klasse", QVariant::fromValue(FLEX_SECOND_CLASS));
     ui->type->setCurrentIndex(booking->getTicketType());
 
-    ui->price->setText(QString::number(booking->getPrice()));
+    ui->price->setValue(booking->getPrice());
+
+    connect(ui->fromStation, &QLineEdit::textChanged, this, &TrainTicketUi::onChangeFromStation);
+    connect(ui->toStation, &QLineEdit::textChanged, this, &TrainTicketUi::onChangeToStation);
+    connect(ui->fromDate, &QDateTimeEdit::dateTimeChanged, this, &TrainTicketUi::onChangeFromDate);
+    connect(ui->arrivalTime, &QDateTimeEdit::dateTimeChanged, this, &TrainTicketUi::onChangeToDate);
+    connect(ui->type, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &TrainTicketUi::onChangeType);
+    connect(ui->price, &QDoubleSpinBox::valueChanged, this, &TrainTicketUi::onChangePrice);
+    connect(ui->connectingStations, &QListView::clicked, this, &TrainTicketUi::onChosenConnectingStations);
+    connect(ui->addItem, &QPushButton::clicked, this, &TrainTicketUi::onAddStation);
 }
 
 TrainTicketUi::~TrainTicketUi() {
     delete ui;
+}
+
+void TrainTicketUi::onChangeFromStation(QString station) {
+    booking->setFromStation(station.toStdString());
+    changeController->onChange();
+}
+
+void TrainTicketUi::onChangeToStation(QString station) {
+    booking->setToStation(station.toStdString());
+    changeController->onChange();
+}
+
+void TrainTicketUi::onChangeFromDate(QDateTime station) {
+    booking->setFromDate(station.date().toString("yyyyMMdd").toStdString());
+    booking->setDepartureTime(station.time().toString("hh:mm").toStdString());
+    changeController->onChange();
+}
+
+void TrainTicketUi::onChangeToDate(QDateTime station) {
+    booking->setToDate(station.date().toString("yyyyMMdd").toStdString());
+    booking->setArrivalTime(station.time().toString("hh:mm").toStdString());
+    changeController->onChange();
+}
+
+void TrainTicketUi::onChangeType(int index) {
+    booking->setTicketType(ui->type->itemData(index).value<TicketType>());
+    changeController->onChange();
+}
+
+void TrainTicketUi::onChangePrice(double amount) {
+    booking->setPrice(amount);
+    changeController->onChange();
+}
+
+void TrainTicketUi::onChosenConnectingStations(QModelIndex index) {
+    bool ok;
+    QString station = QInputDialog::getText(this, "Edit Station",
+                                            "Station name:", QLineEdit::Normal,
+                                            index.data().toString(), &ok);
+    if (ok && !station.isEmpty()) {
+        auto stations = booking->getConnectingStations();
+        stations[index.row()] = station.toStdString();
+        booking->setConnectingStations(stations);
+        updateConnectingStationsModel();
+        changeController->onChange();
+    }
+}
+
+void TrainTicketUi::onAddStation() {
+    bool ok;
+    QString station = QInputDialog::getText(this, "Add Station",
+                                            "Station name:", QLineEdit::Normal,
+                                            "", &ok);
+    if (ok && !station.isEmpty()) {
+        auto stations = booking->getConnectingStations();
+        stations.push_back(station.toStdString());
+        booking->setConnectingStations(stations);
+        updateConnectingStationsModel();
+        changeController->onChange();
+    }
+}
+
+void TrainTicketUi::updateConnectingStationsModel() {
+    QStringList connectingStationList;
+    for (const auto &station: booking->getConnectingStations()) {
+        connectingStationList.append(QString::fromStdString(station));
+    }
+    auto *model = qobject_cast<QStringListModel *>(ui->connectingStations->model());
+    model->setStringList(connectingStationList);
 }

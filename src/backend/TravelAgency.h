@@ -30,4 +30,6 @@ public:
     std::optional<Customer *> findCustomer(long id);
 
     std::optional<Travel *> findTravel(long id);
+
+    void writeFile(const std::string & fileName);
 };

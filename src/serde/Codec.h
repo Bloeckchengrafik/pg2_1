@@ -30,6 +30,8 @@ namespace serde {
     public:
         virtual ~Encoder() = default;
 
+        virtual Encoder *clone() = 0;
+
         virtual void encodeInt(int value) = 0;
 
         virtual void encodeLong(long value) = 0;

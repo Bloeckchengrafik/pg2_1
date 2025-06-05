@@ -55,6 +55,18 @@ RoomType & HotelBooking::getRoomType() {
     return roomType;
 }
 
+void HotelBooking::setHotel(std::string hotel) {
+    this->hotel = std::move(hotel);
+}
+
+void HotelBooking::setTown(std::string town) {
+    this->town = std::move(town);
+}
+
+void HotelBooking::setRoomType(RoomType roomType) {
+    this->roomType = roomType;
+}
+
 std::string HotelBooking::showDetails() {
     std::stringstream out;
     out
@@ -68,8 +80,8 @@ std::string HotelBooking::showDetails() {
     return out.str();
 }
 
-void HotelBooking::showEditor() {
-    const auto ui = new HotelBookingUi(this);
+void HotelBooking::showEditor(ChangeController *changeController) {
+    const auto ui = new HotelBookingUi(this, changeController);
     ui->show();
 }
 

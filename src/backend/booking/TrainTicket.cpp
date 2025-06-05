@@ -71,6 +71,30 @@ std::vector<std::string> &TrainTicket::getConnectingStations() {
     return connectingStations;
 }
 
+void TrainTicket::setConnectingStations(std::vector<std::string> connectingStations) {
+    this->connectingStations = std::move(connectingStations);
+}
+
+void TrainTicket::setFromStation(std::string fromStation) {
+    this->fromStation = std::move(fromStation);
+}
+
+void TrainTicket::setToStation(std::string toStation) {
+    this->toStation = std::move(toStation);
+}
+
+void TrainTicket::setArrivalTime(std::string arrivalTime) {
+    this->arrivalTime = std::move(arrivalTime);
+}
+
+void TrainTicket::setDepartureTime(std::string departureTime) {
+    this->departureTime = std::move(departureTime);
+}
+
+void TrainTicket::setTicketType(TicketType ticketType) {
+    this->ticketType = ticketType;
+}
+
 QIcon TrainTicket::getIcon() {
     return QIcon(":/icons/train.svg");
 }
@@ -105,8 +129,8 @@ std::string TrainTicket::showDetails() {
     return out.str();
 }
 
-void TrainTicket::showEditor() {
-    (new TrainTicketUi(this))->show();
+void TrainTicket::showEditor(ChangeController *changeController) {
+    (new TrainTicketUi(this, changeController))->show();
 }
 
 void serde_objects::Codec<TrainTicket *>::serialize(TrainTicket *&obj, serde::Encoder *encoder) {

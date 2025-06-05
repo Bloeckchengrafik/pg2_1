@@ -218,3 +218,14 @@ std::optional<Travel *> TravelAgency::findTravel(long id) {
 
     return *el;
 }
+
+void TravelAgency::writeFile(const std::string &fileName) {
+    nlohmann::json data;
+    for (auto customer : allCustomers) {
+        customer->serializeAll(data);
+    }
+
+    std::string jsonData = data.dump(4);
+    std::ofstream file(fileName);
+    file << jsonData;
+}

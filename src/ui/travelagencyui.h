@@ -14,14 +14,17 @@ namespace Ui {
 
 typedef std::string (TravelAgency::*ReadFunc)(const std::string &name);
 
-class TravelAgencyUi : public QMainWindow {
+class TravelAgencyUi : public QMainWindow, public ChangeController {
     Q_OBJECT
 
 public:
     explicit TravelAgencyUi(TravelAgency *agency, QWidget *parent = nullptr);
     ~TravelAgencyUi() override;
 
+    void onChange() override;
+
 private slots:
+    void onSave();
     void onReadInFile();
     void onSearchId();
     void onDblClickTravel(int row, int);
@@ -32,6 +35,7 @@ private:
     TravelAgency *agency;
     Customer *selectedCustomer;
     Travel *selectedTravel;
+    bool allowSave = false;
 
     void readFile(ReadFunc func, const std::string &name);
 

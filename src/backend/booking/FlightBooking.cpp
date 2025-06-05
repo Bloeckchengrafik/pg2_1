@@ -52,6 +52,22 @@ std::string &FlightBooking::getAirline() {
     return airline;
 }
 
+void FlightBooking::setAirline(std::string airline) {
+    this->airline = std::move(airline);
+}
+
+void FlightBooking::setBookingClass(BookingClass bookingClass) {
+    this->bookingClass = bookingClass;
+}
+
+void FlightBooking::setFromDestination(std::string fromDestination) {
+    this->fromDestination = std::move(fromDestination);
+}
+
+void FlightBooking::setToDestination(std::string toDestination) {
+    this->toDestination = std::move(toDestination);
+}
+
 QIcon FlightBooking::getIcon() {
     return QIcon(":icons/airplane-in-flight.svg");
 }
@@ -74,8 +90,8 @@ std::string FlightBooking::showDetails() {
     return out.str();
 }
 
-void FlightBooking::showEditor() {
-    (new FlightBookingUi(this))->show();
+void FlightBooking::showEditor(ChangeController *changeController) {
+    (new FlightBookingUi(this, changeController))->show();
 }
 
 void serde_objects::Codec<FlightBooking *>::serialize(FlightBooking *&obj, serde::Encoder *encoder) {

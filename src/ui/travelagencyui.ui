@@ -123,9 +123,16 @@
      <string>File</string>
     </property>
     <addaction name="actionReadFile"/>
+    <addaction name="actionSave"/>
+   </widget>
+   <widget class="QMenu" name="menuCustomers">
+    <property name="title">
+     <string>Customers</string>
+    </property>
     <addaction name="actionSearch"/>
    </widget>
    <addaction name="menuDatei"/>
+   <addaction name="menuCustomers"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBar">
@@ -140,6 +147,7 @@
    </attribute>
    <addaction name="actionReadFile"/>
    <addaction name="actionSearch"/>
+   <addaction name="actionSave"/>
   </widget>
   <action name="actionReadFile">
    <property name="icon">
@@ -161,6 +169,20 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+F</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="icon">
+    <iconset theme="QIcon::ThemeIcon::DocumentSave"/>
+   </property>
+   <property name="text">
+    <string>Save</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
    </property>
    <property name="menuRole">
     <enum>QAction::MenuRole::NoRole</enum>

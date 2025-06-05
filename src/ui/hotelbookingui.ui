@@ -95,7 +95,11 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_7">
       <item>
-       <widget class="QLineEdit" name="price"/>
+       <widget class="QDoubleSpinBox" name="price">
+        <property name="maximum">
+         <double>10000.000000000000000</double>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

@@ -6,9 +6,14 @@
 namespace serde::json {
     class JsonEncoder final : public Encoder {
         nlohmann::json json;
-        std::vector<Encoder *> children{};
+        JsonEncoder *parent;
+        std::vector<JsonEncoder *> children{};
+        std::optional<std::string> parentKey;
 
     public:
+        JsonEncoder(JsonEncoder *parent = nullptr, std::optional<std::string> parentKey = std::nullopt) : parent(parent),
+            parentKey(std::move(parentKey)) {}
+
         ~JsonEncoder() override;
 
         void encodeInt(int value) override;
@@ -24,6 +29,10 @@ namespace serde::json {
         nlohmann::json &getJson();
 
         void encodeLong(long value) override;
+
+        Encoder * clone() override;
+
+        void finish();
     };
 
     class JsonDecoder final : public Decoder {

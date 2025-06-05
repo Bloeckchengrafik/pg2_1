@@ -6,6 +6,7 @@
 #define HOTELBOOKINGUI_H
 
 #include <QWidget>
+#include <QDate>
 
 #include "../backend/booking/HotelBooking.h"
 
@@ -17,11 +18,21 @@ class HotelBookingUi : public QWidget {
 Q_OBJECT
 
 public:
-    explicit HotelBookingUi(HotelBooking* booking, QWidget *parent = nullptr);
+    explicit HotelBookingUi(HotelBooking* booking, ChangeController *changeController, QWidget *parent = nullptr);
     ~HotelBookingUi() override;
+
+public slots:
+    void onSetHotel(QString value);
+    void onSetTown(QString value);
+    void onSetFromDate(QDate date);
+    void onSetToDate(QDate date);
+    void onSetRoomType(int index);
+    void onSetRoomPrice(double amount);
 
 private:
     Ui::HotelBookingUi *ui;
+    HotelBooking *booking;
+    ChangeController *changeController;
 };
 
 

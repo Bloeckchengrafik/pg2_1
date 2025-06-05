@@ -27,6 +27,8 @@ public:
     std::string &getFirstName();
 
     std::vector<Travel *> getTravels();
+
+    void serializeAll(nlohmann::json &json);
 };
 
 template<>

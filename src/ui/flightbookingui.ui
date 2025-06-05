@@ -29,7 +29,11 @@
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
-         <widget class="QLineEdit" name="fromDestination"/>
+         <widget class="QLineEdit" name="fromDestination">
+          <property name="maxLength">
+           <number>3</number>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -41,7 +45,11 @@
        </property>
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
-         <widget class="QLineEdit" name="toDestination"/>
+         <widget class="QLineEdit" name="toDestination">
+          <property name="maxLength">
+           <number>3</number>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -91,7 +99,11 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_5">
       <item>
-       <widget class="QLineEdit" name="price"/>
+       <widget class="QDoubleSpinBox" name="price">
+        <property name="maximum">
+         <double>1000000000000.000000000000000</double>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

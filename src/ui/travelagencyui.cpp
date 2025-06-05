@@ -24,11 +24,55 @@ TravelAgencyUi::TravelAgencyUi(TravelAgency *agency, QWidget *parent)
     connect(ui->tableBookings, &QTableWidget::cellDoubleClicked,
         this, &TravelAgencyUi::onDblClickBooking);
 
+    connect(ui->actionSave, &QAction::triggered,
+        this, &TravelAgencyUi::onSave);
+
     clearUi();
+    ui->actionSave->setEnabled(false);
 }
 
 TravelAgencyUi::~TravelAgencyUi() {
     delete ui;
+}
+
+void TravelAgencyUi::onChange() {
+    allowSave = true;
+    ui->actionSave->setEnabled(true);
+}
+
+void TravelAgencyUi::onSave() {
+    if (!allowSave) {
+        return;
+    }
+
+    QFileDialog dialog(this);
+    dialog.setWindowTitle("Save File");
+    dialog.setAcceptMode(QFileDialog::AcceptSave);
+    dialog.setFileMode(QFileDialog::AnyFile);
+    dialog.setViewMode(QFileDialog::Detail);
+    dialog.setMimeTypeFilters(QStringList{
+        "application/json",
+    });
+    dialog.setNameFilters(QStringList{
+        "JSON files (*.json)",
+    });
+
+    if (dialog.exec() == QDialog::Accepted) {
+        const QString selectedFile = dialog.selectedFiles().first();
+        const QFileInfo fileInfo(selectedFile);
+
+        try {
+            if (fileInfo.suffix() == "json") {
+                agency->writeFile(selectedFile.toStdString());
+                allowSave = false;
+                ui->actionSave->setEnabled(false);
+            } else {
+                QMessageBox::critical(this, "Error", "Unknown file type");
+            }
+        } catch (const std::exception &e) {
+            QMessageBox::critical(this, "Error", e.what());
+        }
+    }
 }
 
 void TravelAgencyUi::onReadInFile() {
@@ -161,7 +205,7 @@ void TravelAgencyUi::displayTravel(Travel *travel) {
 }
 
 void TravelAgencyUi::displayBooking(Booking *booking) {
-    booking->showEditor();
+    booking->showEditor(this);
 }
 
 

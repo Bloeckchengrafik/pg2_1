@@ -21,13 +21,17 @@ public:
 
     std::string showDetails() override;
 
-    void showEditor() override;
+    void showEditor(ChangeController *changeController) override;
 
     std::string &getPickupLocation();
 
     std::string &getReturnLocation();
 
     std::string &getCompany();
+
+    void setPickupLocation(std::string pickupLocation);
+    void setReturnLocation(std::string returnLocation);
+    void setCompany(std::string company);
 
     QIcon getIcon() override;
 };

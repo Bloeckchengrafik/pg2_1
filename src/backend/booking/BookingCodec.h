@@ -10,3 +10,5 @@ template<> struct serde_objects::Codec<Booking*> {
     static void serialize(Booking* &obj, serde::Encoder *encoder);
     static Booking* deserialize(serde::Decoder *decoder);
 };
+
+void serializeBooking(Booking *booking, serde::Encoder *encoder, nlohmann::json &json);

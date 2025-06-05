@@ -6,6 +6,8 @@
 
 #include <qdatetime.h>
 
+#include "booking/BookingCodec.h"
+
 
 long Travel::getId() const {
     return id;
@@ -51,6 +53,17 @@ std::string Travel::getEnd() {
     );
 
     return formatDate((*max)->getToDate());
+}
+
+void Travel::serializeAll(nlohmann::json &json, serde::Encoder *encoder) {
+    auto self = this;
+    serde_objects::Codec<Travel*>::serialize(self, encoder);
+
+    for (auto booking : travelBookings) {
+        auto bookingEncoder = encoder->clone();
+        serializeBooking(booking, bookingEncoder, json);
+        delete bookingEncoder;
+    }
 }
 
 void serde_objects::Codec<Travel *>::serialize(Travel *&obj, serde::Encoder *encoder) {

@@ -36,13 +36,18 @@ public:
 
     std::string showDetails() override;
 
-    void showEditor() override;
+    void showEditor(ChangeController *changeController) override;
 
     std::string &getFromDestination();
 
     std::string &getToDestination();
 
     std::string &getAirline();
+
+    void setAirline(std::string airline);
+    void setBookingClass(BookingClass bookingClass);
+    void setFromDestination(std::string fromDestination);
+    void setToDestination(std::string toDestination);
 
     QIcon getIcon() override;
 

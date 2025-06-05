@@ -34,7 +34,7 @@ public:
 
     std::string showDetails() override;
 
-    void showEditor() override;
+    void showEditor(ChangeController *changeController) override;
 
     std::string &getHotel();
 
@@ -43,6 +43,10 @@ public:
     QIcon getIcon() override;
 
     RoomType & getRoomType();
+
+    void setHotel(std::string hotel);
+    void setRoomType(RoomType roomType);
+    void setTown(std::string town);
 };
 
 template<> struct serde_objects::Codec<HotelBooking*> {
