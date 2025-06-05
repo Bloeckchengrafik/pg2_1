@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <QFileDialog>
+#include <QInputDialog>
 #include <QMessageBox>
 
 #include "../backend/TravelAgency.h"
@@ -14,8 +15,16 @@ TravelAgencyUi::TravelAgencyUi(TravelAgency *agency, QWidget *parent)
     connect(ui->actionReadFile, &QAction::triggered,
             this, &TravelAgencyUi::onReadInFile);
 
-    connect(ui->listWidget, &QListWidget::itemDoubleClicked,
-            this, &TravelAgencyUi::onClickOnDataBox);
+    connect(ui->actionSearch, &QAction::triggered,
+        this, &TravelAgencyUi::onSearchId);
+
+    connect(ui->tableTravels, &QTableWidget::cellDoubleClicked,
+            this, &TravelAgencyUi::onDblClickTravel);
+
+    connect(ui->tableBookings, &QTableWidget::cellDoubleClicked,
+        this, &TravelAgencyUi::onDblClickBooking);
+
+    clearUi();
 }
 
 TravelAgencyUi::~TravelAgencyUi() {
@@ -52,32 +61,116 @@ void TravelAgencyUi::onReadInFile() {
     }
 }
 
-void TravelAgencyUi::onClickOnDataBox(QListWidgetItem *item) {
-    auto *booking = item->data(Qt::UserRole).value<Booking *>();
-    if (booking == nullptr) {
-        std::cout << "no data" << std::endl;
+void TravelAgencyUi::onSearchId() {
+    bool ok;
+    const long id = QInputDialog::getInt(
+        this,
+        "Search by ID",
+        "Enter ID:",
+        0, 0, 999999, 1,
+        &ok
+    );
+
+    if (!ok) {
         return;
     }
 
+    if (const auto customer = agency->findCustomer(id); customer.has_value()) {
+        displayCustomer(customer.value());
+        return;
+    }
+
+    QMessageBox::warning(this, "Not Found", "No customer with this ID found.");
+}
+
+void TravelAgencyUi::onDblClickTravel(int row, int) {
+    if (this->selectedCustomer == nullptr) {
+        return;
+    }
+
+    Travel *travel = this->selectedCustomer->getTravels()[row];
+    displayTravel(travel);
+}
+
+void TravelAgencyUi::onDblClickBooking(int row, int) {
+    if (this->selectedTravel == nullptr) {
+        return;
+    }
+
+    Booking *booking = this->selectedTravel->getBookings()[row];
+    displayBooking(booking);
+}
+
+void TravelAgencyUi::clearUi() {
+    ui->customerBox->hide();
+    ui->groupTravel->hide();
+    this->selectedCustomer = nullptr;
+    this->selectedTravel = nullptr;
+}
+
+void TravelAgencyUi::displayCustomer(Customer *customer) {
+    clearUi();
+    ui->customerBox->show();
+    ui->editId->setText(QString::number(customer->getId()));
+    ui->editFirstName->setText(QString::fromStdString(customer->getFirstName()));
+    ui->editLastName->setText(QString::fromStdString(customer->getLastName()));
+
+    QTableWidget *table = ui->tableTravels;
+    table->clear();
+    table->setColumnCount(3);
+    table->setHorizontalHeaderLabels({"ID", "Travel Start", "Travel End"});
+    table->setRowCount(customer->getTravels().size());
+    table->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+    int row = 0;
+    for (const auto travel: customer->getTravels()) {
+        table->setItem(row, 0, new QTableWidgetItem(QString::number(travel->getId())));
+        table->setItem(row, 1, new QTableWidgetItem(QString::fromStdString(travel->getStart())));
+        table->setItem(row, 2, new QTableWidgetItem(QString::fromStdString(travel->getEnd())));
+        row++;
+    }
+    table->resizeColumnsToContents();
+
+    this->selectedCustomer = customer;
+}
+
+void TravelAgencyUi::displayTravel(Travel *travel) {
+    ui->groupTravel->show();
+    ui->groupTravel->setTitle("Travel " + QString::number(travel->getId()));
+    QTableWidget *table = ui->tableBookings;
+    table->clear();
+    table->setColumnCount(4);
+    table->setHorizontalHeaderLabels({"", "Start", "End", "Price"});
+    table->setRowCount(travel->getBookings().size());
+    table->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    int row = 0;
+    for (const auto booking: travel->getBookings()) {
+        QIcon icon = booking->getIcon();
+        QTableWidgetItem *item = new QTableWidgetItem();
+        item->setIcon(icon);
+        table->setItem(row, 0, item);
+        table->setItem(row, 1, new QTableWidgetItem(QString::fromStdString(formatDate(booking->getFromDate()))));
+        table->setItem(row, 2, new QTableWidgetItem(QString::fromStdString(formatDate(booking->getToDate()))));
+        table->setItem(row, 3, new QTableWidgetItem(QString::number(booking->getPrice())));
+        row++;
+    }
+
+    table->resizeColumnsToContents();
+
+    this->selectedTravel = travel;
+}
+
+void TravelAgencyUi::displayBooking(Booking *booking) {
     booking->showEditor();
 }
 
-void TravelAgencyUi::reloadDataBox() {
-    const auto list = ui->listWidget;
-    list->clear();
-    for (const auto booking: agency->getBookings()) {
-        auto *item = new QListWidgetItem(QString::fromStdString(booking->showDetails()));
-        item->setData(Qt::UserRole, QVariant::fromValue(booking));
-        list->addItem(item);
-    }
-}
 
 void TravelAgencyUi::readFile(const ReadFunc func, const std::string &name) {
     while (true) {
         try {
             const auto meta = (agency->*func)(name);
             QMessageBox::information(this, "Success", QString::fromStdString(meta));
-            reloadDataBox();
+            clearUi();
             return;
         } catch (const std::exception &e) {
             QMessageBox box;

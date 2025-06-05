@@ -7,13 +7,13 @@
     <x>0</x>
     <y>0</y>
     <width>453</width>
-    <height>315</height>
+    <height>386</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>453</width>
-    <height>315</height>
+    <height>386</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -68,6 +68,18 @@
      <layout class="QVBoxLayout" name="verticalLayout_4">
       <item>
        <widget class="QDateEdit" name="fromDate"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBox_6">
+     <property name="title">
+      <string>Typ</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_7">
+      <item>
+       <widget class="QComboBox" name="type"/>
       </item>
      </layout>
     </widget>

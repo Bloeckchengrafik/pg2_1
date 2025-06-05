@@ -7,19 +7,27 @@
 #include "Customer.h"
 
 class TravelAgency {
-    std::vector<Booking*> allBookings{};
-    std::vector<Customer*> allCustomers{};
-    std::vector<Travel*> allTravels{};
+    std::vector<Booking *> allBookings{};
+    std::vector<Customer *> allCustomers{};
+    std::vector<Travel *> allTravels{};
+
+    void mergeWith(const std::vector<Booking *> &vector, const std::vector<Customer *> &customers,
+                   const std::vector<Travel *> &travels);
 
 public:
     TravelAgency() = default;
+
     ~TravelAgency();
 
     std::string readFile(const std::string &name);
-    void printBookings() const;
-    std::vector<Booking*>& getBookings();
 
-    std::optional<Booking*> findBooking(const std::string &id);
-    std::optional<Customer*> findCustomer(long id);
-    std::optional<Travel*> findTravel(long id);
+    void printBookings() const;
+
+    std::vector<Booking *> &getBookings();
+
+    std::optional<Booking *> findBooking(const std::string &id);
+
+    std::optional<Customer *> findCustomer(long id);
+
+    std::optional<Travel *> findTravel(long id);
 };

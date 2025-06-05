@@ -1,6 +1,8 @@
 #pragma once
 #include <functional>
+#include <optional>
 #include <string>
+#include <nlohmann/detail/exceptions.hpp>
 
 namespace serde_objects {
     // Forward Declaration
@@ -10,7 +12,7 @@ namespace serde_objects {
 
 namespace serde {
     template<typename T>
-    using Validator = std::function<void(T&)>;
+    using Validator = std::function<void(T &)>;
 
     class ValidationException final : public std::exception {
         std::string message;
@@ -30,19 +32,20 @@ namespace serde {
 
         virtual void encodeInt(int value) = 0;
 
+        virtual void encodeLong(long value) = 0;
+
         virtual void encodeDouble(double value) = 0;
 
         virtual void encodeString(const std::string &value) = 0;
 
-        virtual Encoder* vec() = 0;
+        virtual Encoder *vec() = 0;
 
-        virtual Encoder* key(const std::string &key) = 0;
+        virtual Encoder *key(const std::string &key) = 0;
 
         template<typename T>
-        Encoder& encode(const std::string &key, const T &value) {
-            Encoder* encoder = this->key(key);
+        Encoder &encode(const std::string &key, T &value) {
+            Encoder *encoder = this->key(key);
             serde_objects::Codec<T>::serialize(value, encoder);
-            delete encoder;
             return *this;
         }
     };
@@ -52,6 +55,8 @@ namespace serde {
         virtual ~Decoder() = default;
 
         virtual int decodeInt() = 0;
+
+        virtual long decodeLong() = 0;
 
         virtual double decodeDouble() = 0;
 
@@ -64,12 +69,11 @@ namespace serde {
         virtual bool isAtEnd() = 0;
 
         template<typename T>
-        T at(const std::string &key, std::initializer_list<Validator<T>> validators) {
+        T at(const std::string &key, std::initializer_list<Validator<T> > validators) {
             Decoder *decoder = this->key(key);
             T result = serde_objects::Codec<T>::deserialize(decoder);
-            delete decoder;
 
-            for (auto validator : validators) {
+            for (auto validator: validators) {
                 validator(result);
             }
 
@@ -79,6 +83,24 @@ namespace serde {
         template<typename T>
         T at(const std::string &key) {
             return at<T>(key, {});
+        }
+
+        template<typename T>
+        std::optional<T> atOptional(const std::string &key, std::initializer_list<Validator<T> > validators) {
+            try {
+                return at<T>(key, validators);
+            } catch (const std::exception &) {
+                return std::nullopt;
+            }
+        }
+
+        template<typename T>
+        std::optional<T> atOptional(const std::string &key) {
+            try {
+                return at<T>(key, {});
+            } catch (const std::exception &) {
+                return std::nullopt;
+            }
         }
     };
 }

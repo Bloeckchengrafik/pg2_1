@@ -27,6 +27,14 @@ TrainTicketUi::TrainTicketUi(TrainTicket *booking, QWidget *parent) :
     ui->connectingStations->setModel(connectingStationsModel);
     connectingStationsModel->setStringList(connectingStationList);
 
+    ui->type->addItem("Supersparpreis 1. Klasse", QVariant::fromValue(SUPER_SAVING_FIRST_CLASS));
+    ui->type->addItem("Supersparpreis 2. Klasse", QVariant::fromValue(SUPER_SAVING_SECOND_CLASS));
+    ui->type->addItem("Sparpreis 1. Klasse", QVariant::fromValue(SAVING_FIRST_CLASS));
+    ui->type->addItem("Sparpreis 2. Klasse", QVariant::fromValue(SAVING_SECOND_CLASS));
+    ui->type->addItem("Flexpreis 1. Klasse", QVariant::fromValue(FLEX_FIRST_CLASS));
+    ui->type->addItem("Flexpreis 2. Klasse", QVariant::fromValue(FLEX_SECOND_CLASS));
+    ui->type->setCurrentIndex(booking->getTicketType());
+
     ui->price->setText(QString::number(booking->getPrice()));
 }
 

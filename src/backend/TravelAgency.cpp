@@ -13,7 +13,8 @@
 
 using json = nlohmann::json;
 
-std::string getMetadata(const std::vector<Booking *> &bookings) {
+std::string getMetadata(const std::vector<Booking *> &bookings, const std::vector<Customer *> &customers,
+                        const std::vector<Travel *> &travels) {
     double priceFlight = 0;
     double priceRentalCar = 0;
     double priceHotel = 0;
@@ -44,9 +45,45 @@ std::string getMetadata(const std::vector<Booking *> &bookings) {
     out << "Es wurden " << countFlight << " Flugbuchungen im Wert von " << priceFlight << "€, "
             << countRentalCar << " Mietwagenbuchungen im Wert von " << priceRentalCar << "€, "
             << countHotel << " Hotelreservierungen im Wert von " << priceHotel << "€ und "
-            << countTrain << " Zugbuchungen im Wert von " << priceTrain << "€, angelegt";
+            << countTrain << " Zugbuchungen im Wert von " << priceTrain << "€, angelegt" << std::endl;
+
+    out << "Es wurden " << travels.size() << " Reisen und " << customers.size() << " Kunden angelegt" << std::endl;
+
+    out << "Kunde 1 hat " << std::ranges::count_if(travels, [](const Travel *travel) {
+        return travel->getCustomerId() == 1;
+    }) << " Reisen gebucht" << std::endl;
+
+    out << "Zur Reise ID 17 gehören " << (*std::ranges::find_if(travels, [](const Travel *travel) {
+        return travel->getId() == 17;
+    }))->getBookings().size() << " Buchungen" << std::endl;
 
     return out.str();
+}
+
+void TravelAgency::mergeWith(
+    const std::vector<Booking *> &vector,
+    const std::vector<Customer *> &customers,
+    const std::vector<Travel *> &travels
+) {
+    for (const auto booking: vector) {
+        allBookings.push_back(booking);
+    }
+
+    for (auto travel: travels) {
+        if (auto found_travel = findTravel(travel->getId()); found_travel == std::nullopt) {
+            allTravels.push_back(travel);
+        } else {
+            for (const auto booking: travel->getBookings()) (*found_travel)->addBooking(booking);
+        }
+    }
+
+    for (auto customer: customers) {
+        if (auto found_customer = findCustomer(customer->getId()); found_customer == std::nullopt) {
+            allCustomers.push_back(customer);
+        } else {
+            for (const auto travel: customer->getTravels()) (*found_customer)->addTravel(travel);
+        }
+    }
 }
 
 TravelAgency::~TravelAgency() {
@@ -80,6 +117,38 @@ std::string TravelAgency::readFile(const std::string &name) {
         try {
             auto booking = serde_objects::Codec<Booking *>::deserialize(decoder);
             bookings.push_back(booking);
+
+            auto travelId = decoder->at<const long>("travelId");
+            auto travel = std::ranges::find_if(travels, [&travelId](const Travel *travel) {
+                return travel->getId() == travelId;
+            });
+
+            Travel *travelObj = nullptr;
+
+            if (travel == travels.end()) {
+                travelObj = serde_objects::Codec<Travel *>::deserialize(decoder);
+                travels.push_back(travelObj);
+            } else {
+                travelObj = *travel;
+            }
+
+            travelObj->addBooking(booking);
+
+            auto customerId = decoder->at<const long>("customerId");
+            auto customer = std::ranges::find_if(customers, [&customerId](const Customer *customer) {
+                return customer->getId() == customerId;
+            });
+
+            Customer *customerObj = nullptr;
+
+            if (customer == customers.end()) {
+                customerObj = serde_objects::Codec<Customer *>::deserialize(decoder);
+                customers.push_back(customerObj);
+            } else {
+                customerObj = *customer;
+            }
+
+            customerObj->addTravel(travelObj);
         } catch (const std::exception &e) {
             std::stringstream out;
             out << "Error while parsing JSON for object " << objCount << ": " << e.what();
@@ -91,8 +160,10 @@ std::string TravelAgency::readFile(const std::string &name) {
         delete decoder;
     }
 
-    const auto metadata = getMetadata(bookings);
-    this->allBookings.insert(this->allBookings.end(), bookings.begin(), bookings.end());
+    printf("found %ld bookings\n", bookings.size());
+
+    const auto metadata = getMetadata(bookings, customers, travels);
+    mergeWith(bookings, customers, travels);
     return metadata;
 }
 
@@ -107,28 +178,43 @@ std::vector<Booking *> &TravelAgency::getBookings() {
 }
 
 std::optional<Booking *> TravelAgency::findBooking(const std::string &id) {
-    return *std::ranges::find_if(
+    const auto el = std::ranges::find_if(
         allBookings,
         [&id](Booking *booking) {
             return booking->getId() == id;
         }
     );
+    if (el == allBookings.end()) {
+        return std::nullopt;
+    }
+    return *el;
 }
 
 std::optional<Customer *> TravelAgency::findCustomer(long id) {
-    return *std::ranges::find_if(
+    const auto el = std::ranges::find_if(
         allCustomers,
         [&id](Customer *customer) {
             return customer->getId() == id;
         }
     );
+
+    if (el == allCustomers.end()) {
+        return std::nullopt;
+    }
+    return *el;
 }
 
 std::optional<Travel *> TravelAgency::findTravel(long id) {
-    return *std::ranges::find_if(
+    const auto el = std::ranges::find_if(
         allTravels,
         [&id](const Travel *travel) {
             return travel->getId() == id;
         }
     );
+
+    if (el == allTravels.end()) {
+        return std::nullopt;
+    }
+
+    return *el;
 }

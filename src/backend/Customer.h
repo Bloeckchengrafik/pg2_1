@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "Travel.h"
+#include "../serde/prelude.h"
 
 class Customer {
     long id;
@@ -20,5 +21,17 @@ public:
     long getId() const;
 
     void addTravel(Travel *travel);
+
+    std::string &getLastName();
+
+    std::string &getFirstName();
+
+    std::vector<Travel *> getTravels();
 };
 
+template<>
+struct serde_objects::Codec<Customer *> {
+    static void serialize(Customer * &obj, serde::Encoder *encoder);
+
+    static Customer *deserialize(serde::Decoder *decoder);
+};

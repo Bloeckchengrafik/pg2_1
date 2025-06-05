@@ -2,12 +2,25 @@
 #include "Booking.h"
 #include "../../serde/prelude.h"
 
+enum BookingClass {
+    ECONOMY,
+    PREMIUM_ECONOMY,
+    BUSINESS,
+    FIRST_CLASS
+};
+
+template<> struct serde_objects::Codec<BookingClass> {
+    static void serialize(BookingClass &obj, serde::Encoder *encoder);
+    static BookingClass deserialize(serde::Decoder *decoder);
+};
+
 class FlightBooking final : public Booking {
     friend class FlightBookingUi;
 
     std::string fromDestination;
     std::string toDestination;
     std::string airline;
+    BookingClass bookingClass;
 
 public:
     FlightBooking(
@@ -17,7 +30,8 @@ public:
         const std::string &toDate,
         std::string fromDestination,
         std::string toDestination,
-        std::string airline
+        std::string airline,
+        BookingClass bookingClass
     );
 
     std::string showDetails() override;
@@ -29,6 +43,10 @@ public:
     std::string &getToDestination();
 
     std::string &getAirline();
+
+    QIcon getIcon() override;
+
+    BookingClass & getBookingClass();
 };
 
 template<> struct serde_objects::Codec<FlightBooking*> {

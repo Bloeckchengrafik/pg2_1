@@ -2,6 +2,7 @@
 #define TRAVELAGENCYUI_H
 
 #include <QMainWindow>
+#include <QtWidgets/QTableView>
 
 #include "../backend/TravelAgency.h"
 
@@ -22,14 +23,22 @@ public:
 
 private slots:
     void onReadInFile();
-    void onClickOnDataBox(QListWidgetItem *item);
+    void onSearchId();
+    void onDblClickTravel(int row, int);
+    void onDblClickBooking(int row, int);
 
 private:
     Ui::TravelAgencyUi *ui;
     TravelAgency *agency;
+    Customer *selectedCustomer;
+    Travel *selectedTravel;
 
-    void reloadDataBox();
     void readFile(ReadFunc func, const std::string &name);
+
+    void clearUi();
+    void displayCustomer(Customer *customer);
+    void displayTravel(Travel *travel);
+    void displayBooking(Booking *booking);
 };
 
 #endif // TRAVELAGENCYUI_H

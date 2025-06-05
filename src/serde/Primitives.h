@@ -31,6 +31,13 @@ struct serde_objects::Codec<const double> {
 };
 
 template<>
+struct serde_objects::Codec<const long> {
+    static void serialize(const double &obj, serde::Encoder *encoder);
+
+    static const double deserialize(serde::Decoder *decoder);
+};
+
+template<>
 struct serde_objects::Codec<std::string> {
     static void serialize(std::string &obj, serde::Encoder *encoder);
 

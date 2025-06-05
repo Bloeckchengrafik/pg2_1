@@ -22,6 +22,8 @@ namespace serde::json {
         Encoder *key(const std::string &key) override;
 
         nlohmann::json &getJson();
+
+        void encodeLong(long value) override;
     };
 
     class JsonDecoder final : public Decoder {
@@ -45,6 +47,8 @@ namespace serde::json {
         Decoder *key(const std::string &key) override;
 
         bool isAtEnd() override;
+
+        long decodeLong() override;
     };
 
     class IteratingJsonDecoder final : public Decoder {
@@ -67,5 +71,7 @@ namespace serde::json {
         Decoder *key(const std::string &key) override;
 
         bool isAtEnd() override;
+
+        long decodeLong() override;
     };
 }

@@ -2,6 +2,19 @@
 #include "Booking.h"
 #include "../../serde/prelude.h"
 
+enum TicketType {
+    SUPER_SAVING_FIRST_CLASS,
+    SUPER_SAVING_SECOND_CLASS,
+    SAVING_FIRST_CLASS,
+    SAVING_SECOND_CLASS,
+    FLEX_FIRST_CLASS,
+    FLEX_SECOND_CLASS,
+};
+
+template<> struct serde_objects::Codec<TicketType> {
+    static void serialize(TicketType &obj, serde::Encoder *encoder);
+    static TicketType deserialize(serde::Decoder *decoder);
+};
 
 class TrainTicket final : public Booking {
     friend class TrainTicketUi;
@@ -11,6 +24,7 @@ class TrainTicket final : public Booking {
     std::string arrivalTime;
     std::string departureTime;
     std::vector<std::string> connectingStations;
+    TicketType ticketType;
 
 public:
     TrainTicket(
@@ -22,7 +36,8 @@ public:
         std::string departureTime,
         std::string fromStation,
         std::string toStation,
-        const std::vector<std::string> &connectingStations
+        const std::vector<std::string> &connectingStations,
+        TicketType ticketType
     );
 
     std::string showDetails() override;
@@ -38,6 +53,10 @@ public:
     std::string &getDepartureTime();
 
     std::vector<std::string> &getConnectingStations();
+
+    QIcon getIcon() override;
+
+    TicketType & getTicketType();
 };
 
 

@@ -28,6 +28,8 @@ public:
     std::string &getReturnLocation();
 
     std::string &getCompany();
+
+    QIcon getIcon() override;
 };
 
 template<> struct serde_objects::Codec<RentalCarReservation*> {

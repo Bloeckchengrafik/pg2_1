@@ -26,6 +26,7 @@ public:
 
     virtual std::string showDetails() = 0;
     virtual void showEditor() = 0;
+    virtual QIcon getIcon() = 0;
 
     [[nodiscard]] double getPrice();
     [[nodiscard]] std::string &getId();

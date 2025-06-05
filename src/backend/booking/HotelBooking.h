@@ -2,11 +2,24 @@
 #include "Booking.h"
 #include "../../serde/prelude.h"
 
+enum RoomType {
+    SINGLE_ROOM,
+    DOUBLE_ROOM,
+    SUITE,
+    APPARTMENT
+};
+
+template<> struct serde_objects::Codec<RoomType> {
+    static void serialize(RoomType &obj, serde::Encoder *encoder);
+    static RoomType deserialize(serde::Decoder *decoder);
+};
+
 class HotelBooking final : public Booking {
     friend class HotelBookingUi;
 
     std::string hotel;
     std::string town;
+    RoomType roomType;
 
 public:
     HotelBooking(
@@ -15,7 +28,8 @@ public:
         const std::string &fromDate,
         const std::string &toDate,
         std::string hotel,
-        std::string town
+        std::string town,
+        RoomType roomType
     );
 
     std::string showDetails() override;
@@ -25,6 +39,10 @@ public:
     std::string &getHotel();
 
     std::string &getTown();
+
+    QIcon getIcon() override;
+
+    RoomType & getRoomType();
 };
 
 template<> struct serde_objects::Codec<HotelBooking*> {

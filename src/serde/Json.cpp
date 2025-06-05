@@ -38,6 +38,10 @@ nlohmann::json &serde::json::JsonEncoder::getJson() {
     return json;
 }
 
+void serde::json::JsonEncoder::encodeLong(long value) {
+    json = value;
+}
+
 serde::json::JsonDecoder::~JsonDecoder() {
     for (const auto child : children) delete child;
 }
@@ -71,6 +75,10 @@ bool serde::json::JsonDecoder::isAtEnd() {
     return false;
 }
 
+long serde::json::JsonDecoder::decodeLong() {
+    return json.get<long>();
+}
+
 int serde::json::IteratingJsonDecoder::decodeInt() {
     return (start++)->get<int>();
 }
@@ -93,4 +101,8 @@ serde::Decoder * serde::json::IteratingJsonDecoder::key(const std::string &key) 
 
 bool serde::json::IteratingJsonDecoder::isAtEnd() {
     return start == end;
+}
+
+long serde::json::IteratingJsonDecoder::decodeLong() {
+    return (start++)->get<long>();
 }

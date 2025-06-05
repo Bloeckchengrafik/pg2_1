@@ -5,12 +5,39 @@
 #include "FlightBooking.h"
 #include "../../ui/flightbookingui.h"
 
-FlightBooking::FlightBooking(const std::string &id, const double price, const std::string &fromDate,
-                             const std::string &toDate, std::string fromDestination, std::string toDestination,
-                             std::string airline): Booking(id, price, fromDate, toDate),
-                                                   fromDestination(std::move(fromDestination)),
-                                                   toDestination(std::move(toDestination)),
-                                                   airline(std::move(airline)) {
+void serde_objects::Codec<BookingClass>::serialize(BookingClass &obj, serde::Encoder *encoder) {
+    switch (obj) {
+        case ECONOMY:
+            encoder->encodeString("Y");
+            break;
+        case PREMIUM_ECONOMY:
+            encoder->encodeString("W");
+            break;
+        case BUSINESS:
+            encoder->encodeString("J");
+            break;
+        case FIRST_CLASS:
+            encoder->encodeString("F");
+            break;
+    }
+}
+
+BookingClass serde_objects::Codec<BookingClass>::deserialize(serde::Decoder *decoder) {
+    const auto str = decoder->decodeString();
+    if (str == "Y") return ECONOMY;
+    if (str == "W") return PREMIUM_ECONOMY;
+    if (str == "J") return BUSINESS;
+    if (str == "F") return FIRST_CLASS;
+    throw serde::ValidationException("Invalid booking class code");
+}
+
+FlightBooking::FlightBooking(
+    const std::string &id, const double price, const std::string &fromDate,
+    const std::string &toDate, std::string fromDestination, std::string toDestination,
+    std::string airline, BookingClass bookingClass): Booking(id, price, fromDate, toDate),
+                                                     fromDestination(std::move(fromDestination)),
+                                                     toDestination(std::move(toDestination)),
+                                                     airline(std::move(airline)), bookingClass(bookingClass) {
 }
 
 std::string &FlightBooking::getFromDestination() {
@@ -23,6 +50,14 @@ std::string &FlightBooking::getToDestination() {
 
 std::string &FlightBooking::getAirline() {
     return airline;
+}
+
+QIcon FlightBooking::getIcon() {
+    return QIcon(":icons/airplane-in-flight.svg");
+}
+
+BookingClass & FlightBooking::getBookingClass() {
+    return bookingClass;
 }
 
 std::string FlightBooking::showDetails() {
@@ -50,7 +85,8 @@ void serde_objects::Codec<FlightBooking *>::serialize(FlightBooking *&obj, serde
             .encode<const std::string>("toDate", obj->getToDate())
             .encode<const std::string>("fromDest", obj->getFromDestination())
             .encode<const std::string>("toDest", obj->getToDestination())
-            .encode<const std::string>("airline", obj->getAirline());
+            .encode<const std::string>("airline", obj->getAirline())
+            .encode<BookingClass>("bookingClass", obj->getBookingClass());
 }
 
 FlightBooking *serde_objects::Codec<FlightBooking *>::deserialize(serde::Decoder *decoder) {
@@ -60,13 +96,14 @@ FlightBooking *serde_objects::Codec<FlightBooking *>::deserialize(serde::Decoder
         decoder->at<std::string>("fromDate", {serde::validate::assertNotEmpty("From date cannot be empty")}),
         decoder->at<std::string>("toDate", {serde::validate::assertNotEmpty("To date cannot be empty")}),
         decoder->at<std::string>("fromDest", {
-                                    serde::validate::assertNotEmpty("From destination cannot be empty"),
-                                    serde::validate::assertLength(3, "From destination must be 3 characters")
-                                }),
+                                     serde::validate::assertNotEmpty("From destination cannot be empty"),
+                                     serde::validate::assertLength(3, "From destination must be 3 characters")
+                                 }),
         decoder->at<std::string>("toDest", {
-                                    serde::validate::assertNotEmpty("To destination cannot be empty"),
-                                    serde::validate::assertLength(3, "To destination must be 3 characters")
-                                }),
-        decoder->at<std::string>("airline", {serde::validate::assertNotEmpty("Airline cannot be empty")})
+                                     serde::validate::assertNotEmpty("To destination cannot be empty"),
+                                     serde::validate::assertLength(3, "To destination must be 3 characters")
+                                 }),
+        decoder->at<std::string>("airline", {serde::validate::assertNotEmpty("Airline cannot be empty")}),
+        decoder->at<BookingClass>("bookingClass")
     );
 }

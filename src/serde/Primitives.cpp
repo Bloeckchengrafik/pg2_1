@@ -32,6 +32,14 @@ const double serde_objects::Codec<const double>::deserialize(serde::Decoder *dec
     return decoder->decodeDouble();
 }
 
+void serde_objects::Codec<const long>::serialize(const double &obj, serde::Encoder *encoder) {
+    encoder->encodeLong(obj);
+}
+
+const double serde_objects::Codec<const long>::deserialize(serde::Decoder *decoder) {
+    return decoder->decodeDouble();
+}
+
 void serde_objects::Codec<std::string>::serialize(std::string &obj, serde::Encoder *encoder) {
     encoder->encodeString(obj);
 }

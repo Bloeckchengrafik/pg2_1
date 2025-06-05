@@ -32,6 +32,15 @@ qt_add_executable(
 target_link_libraries(pg2_1 PRIVATE nlohmann_json::nlohmann_json)
 target_link_libraries(pg2_1 PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 
+qt_add_resources(pg2_1 "icons"
+        PREFIX "/"
+        FILES
+            icons/airplane-in-flight.svg
+            icons/bed.svg
+            icons/car-profile.svg
+            icons/train.svg
+)
+
 # explicit, fixed bundle identifier manually though.
 if(${QT_VERSION} VERSION_LESS 6.1.0)
     set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.test)

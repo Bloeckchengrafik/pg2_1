@@ -16,6 +16,11 @@ FlightBookingUi::FlightBookingUi(FlightBooking *booking, QWidget *parent) :
     ui->airline->setText(QString::fromStdString(booking->getAirline()));
     ui->fromDate->setDate(parseDate(booking->getFromDate()));
     ui->price->setText(QString::number(booking->getPrice()));
+    ui->type->addItem("Economy", QVariant::fromValue(ECONOMY));
+    ui->type->addItem("Premium Economy", QVariant::fromValue(PREMIUM_ECONOMY));
+    ui->type->addItem("Business", QVariant::fromValue(BUSINESS));
+    ui->type->addItem("First Class", QVariant::fromValue(FIRST_CLASS));
+    ui->type->setCurrentIndex(booking->getBookingClass());
 }
 
 FlightBookingUi::~FlightBookingUi() {

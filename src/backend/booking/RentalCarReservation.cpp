@@ -24,6 +24,10 @@ std::string &RentalCarReservation::getCompany() {
     return company;
 }
 
+QIcon RentalCarReservation::getIcon() {
+    return QIcon(":/icons/car-profile.svg");
+}
+
 std::string RentalCarReservation::showDetails() {
     std::stringstream out;
     out
