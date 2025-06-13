@@ -18,7 +18,10 @@ void serde::json::JsonEncoder::encodeString(const std::string &value) {
 
 serde::Encoder *serde::json::JsonEncoder::vec() {
     json = nlohmann::json::array();
-    auto *encoder = new JsonEncoder();
+    JsonSetterFunction setter = [&](nlohmann::json j) {
+        json = j;
+    };
+    auto *encoder = new IteratingJsonEncoder(std::optional<JsonSetterFunction>(setter));
     children.push_back(encoder);
     return encoder;
 }
@@ -28,7 +31,11 @@ serde::Encoder *serde::json::JsonEncoder::key(const std::string &key) {
         json = nlohmann::json::object();
     }
     
-    auto *encoder = new JsonEncoder(this, key);
+    // Convert the lambda to a function pointer
+    JsonSetterFunction setter = [this, cap_key = key](nlohmann::json j) {
+        this->json[cap_key] = j;
+    };
+    auto *encoder = new JsonEncoder(std::optional<JsonSetterFunction>(setter));
     children.push_back(encoder);
     json[key] = encoder->json;
     return encoder;
@@ -54,15 +61,63 @@ void serde::json::JsonEncoder::finish() {
     for (const auto child : children) child->finish();
     children.clear();
 
-    if (parent == nullptr || parentKey == std::nullopt) {
-        printf("warn: parent null");
+    if (fn == std::nullopt) {
         return;
     }
 
-    parent->json[parentKey.value()] = json;
-    parent = nullptr;
-    parentKey = std::nullopt;
+    (*fn)(json);
 }
+
+//iter
+
+serde::json::IteratingJsonEncoder::~IteratingJsonEncoder() {
+    for (const auto child : children) delete child;
+}
+
+void serde::json::IteratingJsonEncoder::encodeInt(int value) {
+    json.push_back(value);
+}
+
+void serde::json::IteratingJsonEncoder::encodeDouble(double value) {
+    json.push_back(value);
+}
+
+void serde::json::IteratingJsonEncoder::encodeString(const std::string &value) {
+    json.push_back(value);
+}
+
+serde::Encoder *serde::json::IteratingJsonEncoder::vec() {
+    return this;
+}
+
+serde::Encoder *serde::json::IteratingJsonEncoder::key(const std::string &key) {
+    throw std::runtime_error("not implemented");
+}
+
+nlohmann::json &serde::json::IteratingJsonEncoder::getJson() {
+    for (const auto child : children) child->finish();
+    return json;
+}
+
+void serde::json::IteratingJsonEncoder::encodeLong(long value) {
+    json.push_back(value);
+}
+
+serde::Encoder * serde::json::IteratingJsonEncoder::clone() {
+    return this;
+}
+
+void serde::json::IteratingJsonEncoder::finish() {
+    for (const auto child : children) child->finish();
+    children.clear();
+
+    if (fn == std::nullopt) {
+        return;
+    }
+
+    (*fn)(json);
+}
+//end
 
 serde::json::JsonDecoder::~JsonDecoder() {
     for (const auto child : children) delete child;

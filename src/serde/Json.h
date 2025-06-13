@@ -1,18 +1,24 @@
 #pragma once
 #include <nlohmann/json.hpp>
+#include <functional>
 
 #include "Codec.h"
 
 namespace serde::json {
-    class JsonEncoder final : public Encoder {
+    class AbstractJsonEncoder : public Encoder {
+    public:
+        virtual void finish() = 0;
+    };
+
+    typedef std::function<void(nlohmann::json value)> JsonSetterFunction;
+
+    class JsonEncoder final : public AbstractJsonEncoder {
         nlohmann::json json;
-        JsonEncoder *parent;
-        std::vector<JsonEncoder *> children{};
-        std::optional<std::string> parentKey;
+        std::vector<AbstractJsonEncoder *> children{};
+        std::optional<JsonSetterFunction> fn;
 
     public:
-        JsonEncoder(JsonEncoder *parent = nullptr, std::optional<std::string> parentKey = std::nullopt) : parent(parent),
-            parentKey(std::move(parentKey)) {}
+        JsonEncoder(std::optional<JsonSetterFunction> fn = std::nullopt) : fn(fn) {}
 
         ~JsonEncoder() override;
 
@@ -32,7 +38,36 @@ namespace serde::json {
 
         Encoder * clone() override;
 
-        void finish();
+        void finish() override;
+    };
+
+    class IteratingJsonEncoder final : public AbstractJsonEncoder {
+        nlohmann::json json = nlohmann::json::array();
+        std::vector<AbstractJsonEncoder *> children{};
+        std::optional<JsonSetterFunction> fn;
+
+    public:
+        IteratingJsonEncoder(std::optional<JsonSetterFunction> fn = std::nullopt) : fn(fn) {}
+
+        ~IteratingJsonEncoder() override;
+
+        void encodeInt(int value) override;
+
+        void encodeDouble(double value) override;
+
+        void encodeString(const std::string &value) override;
+
+        Encoder *vec() override;
+
+        Encoder *key(const std::string &key) override;
+
+        nlohmann::json &getJson();
+
+        void encodeLong(long value) override;
+
+        Encoder * clone() override;
+
+        void finish() override;
     };
 
     class JsonDecoder final : public Decoder {
