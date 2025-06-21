@@ -48,6 +48,8 @@ public:
     void setReturnPosition(ReturnPosition returnPosition);
 
     QIcon getIcon() override;
+
+    void intoGeoJsonElements(std::vector<std::unique_ptr<GeoJsonElement>> &vector) override;
 };
 
 template<> struct serde_objects::Codec<std::shared_ptr<RentalCarReservation>> {

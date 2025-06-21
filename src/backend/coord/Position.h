@@ -31,4 +31,8 @@ struct Position {
             decoder->at<double>(LO.toString())
         };
     }
+
+    std::pair<double, double> toPair() const {
+        return { latitude, longitude };
+    }
 };

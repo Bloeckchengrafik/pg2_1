@@ -86,6 +86,8 @@ public:
     QIcon getIcon() override;
 
     TicketType & getTicketType();
+
+    void intoGeoJsonElements(std::vector<std::unique_ptr<GeoJsonElement>> &vector) override;
 };
 
 

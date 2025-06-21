@@ -68,6 +68,8 @@ public:
     QIcon getIcon() override;
 
     BookingClass &getBookingClass();
+
+    void intoGeoJsonElements(std::vector<std::unique_ptr<GeoJsonElement>> &vector) override;
 };
 
 template<>

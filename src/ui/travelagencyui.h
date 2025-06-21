@@ -5,6 +5,7 @@
 #include <QtWidgets/QTableView>
 
 #include "../backend/TravelAgency.h"
+#include "../geojson/geojsonview.h"
 
 class QListWidgetItem;
 
@@ -33,6 +34,7 @@ private slots:
 
 private:
     Ui::TravelAgencyUi *ui;
+    GeoJsonView *mapView;
     std::shared_ptr<TravelAgency> agency;
     std::optional<std::shared_ptr<Customer>> selectedCustomer;
     std::optional<std::shared_ptr<Travel>> selectedTravel;

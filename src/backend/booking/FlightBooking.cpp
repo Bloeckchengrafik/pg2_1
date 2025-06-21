@@ -3,6 +3,9 @@
 //
 
 #include "FlightBooking.h"
+
+#include "../../geojson/GeoJsonLine.h"
+#include "../../geojson/GeoJsonPin.h"
 #include "../../ui/flightbookingui.h"
 
 void serde_objects::Codec<BookingClass>::serialize(BookingClass &obj, serde::Encoder *encoder) {
@@ -88,6 +91,15 @@ QIcon FlightBooking::getIcon() {
 
 BookingClass &FlightBooking::getBookingClass() {
     return bookingClass;
+}
+
+void FlightBooking::intoGeoJsonElements(std::vector<std::unique_ptr<GeoJsonElement>> &vector) {
+    vector.push_back(GeoJsonPin::pin(this->fromDestination, this->fromDestinationPosition));
+    vector.push_back(GeoJsonPin::pin(this->toDestination, this->toDestinationPosition));
+    vector.push_back(GeoJsonLine::polyLine({
+        fromDestinationPosition.toPair(),
+        toDestinationPosition.toPair()
+    }));
 }
 
 std::string FlightBooking::showDetails() {

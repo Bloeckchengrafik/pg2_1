@@ -1,4 +1,7 @@
 #include "RentalCarReservation.h"
+
+#include "../../geojson/GeoJsonLine.h"
+#include "../../geojson/GeoJsonPin.h"
 #include "../../ui/rentalcarreservationui.h"
 
 RentalCarReservation::RentalCarReservation(
@@ -58,6 +61,19 @@ void RentalCarReservation::setReturnPosition(ReturnPosition returnPosition) {
 
 QIcon RentalCarReservation::getIcon() {
     return QIcon(":/icons/car-profile.svg");
+}
+
+void RentalCarReservation::intoGeoJsonElements(std::vector<std::unique_ptr<GeoJsonElement>> &vector) {
+    if (this->pickupLocation == this->returnLocation) {
+        vector.push_back(GeoJsonPin::pin(this->pickupLocation, this->pickupPosition));
+    } else {
+        vector.push_back(GeoJsonPin::pin(this->pickupLocation, this->pickupPosition));
+        vector.push_back(GeoJsonPin::pin(this->returnLocation, this->returnPosition));
+        vector.push_back(GeoJsonLine::polyLine({
+            this->pickupPosition.toPair(),
+            this->returnPosition.toPair()
+        }));
+    }
 }
 
 std::string RentalCarReservation::showDetails() {

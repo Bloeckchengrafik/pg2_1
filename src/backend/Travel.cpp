@@ -68,12 +68,16 @@ void Travel::serializeAll(nlohmann::json &json, serde::Encoder *encoder) {
     }
 }
 
-void serde_objects::Codec<std::shared_ptr<Travel>>::serialize(std::shared_ptr<Travel> &obj, serde::Encoder *encoder) {
+void Travel::intoGeoJsonElements(std::vector<std::unique_ptr<GeoJsonElement> > &vector) {
+    for (const auto booking: this->travelBookings) booking->intoGeoJsonElements(vector);
+}
+
+void serde_objects::Codec<std::shared_ptr<Travel> >::serialize(std::shared_ptr<Travel> &obj, serde::Encoder *encoder) {
     encoder->encode<const long>("travelId", obj->getId())
             .encode<const long>("customerId", obj->getCustomerId());
 }
 
-std::shared_ptr<Travel> serde_objects::Codec<std::shared_ptr<Travel>>::deserialize(serde::Decoder *decoder) {
+std::shared_ptr<Travel> serde_objects::Codec<std::shared_ptr<Travel> >::deserialize(serde::Decoder *decoder) {
     return std::make_shared<Travel>(
         decoder->at<const long>("travelId"),
         decoder->at<const long>("customerId")

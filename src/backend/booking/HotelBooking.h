@@ -54,6 +54,8 @@ public:
     void setHotel(std::string hotel);
     void setRoomType(RoomType roomType);
     void setTown(std::string town);
+
+    void intoGeoJsonElements(std::vector<std::unique_ptr<GeoJsonElement>> &vector) override;
 };
 
 template<> struct serde_objects::Codec<std::shared_ptr<HotelBooking>> {

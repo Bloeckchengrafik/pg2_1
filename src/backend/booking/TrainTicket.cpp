@@ -1,6 +1,8 @@
 #include "TrainTicket.h"
 
 #include "FlightBooking.h"
+#include "../../geojson/GeoJsonLine.h"
+#include "../../geojson/GeoJsonPin.h"
 #include "../../ui/trainticketui.h"
 
 void serde_objects::Codec<TicketType>::serialize(TicketType &obj, serde::Encoder *encoder) {
@@ -130,6 +132,19 @@ TicketType &TrainTicket::getTicketType() {
     return ticketType;
 }
 
+void TrainTicket::intoGeoJsonElements(std::vector<std::unique_ptr<GeoJsonElement> > &vector) {
+    std::vector<std::pair<double, double> > pos;
+    pos.push_back(this->fromStationPosition.toPair());
+    vector.push_back(GeoJsonPin::pin(this->fromStation, this->fromStationPosition));
+    for (auto [station, position]: connectingStations) {
+        pos.push_back(position.toPair());
+        vector.push_back(GeoJsonPin::pin(station, position));
+    }
+    pos.push_back(this->toStationPosition.toPair());
+    vector.push_back(GeoJsonPin::pin(this->toStation, this->toStationPosition));
+    vector.push_back(GeoJsonLine::polyLine(pos));
+}
+
 std::string TrainTicket::showDetails() {
     std::stringstream out;
     out << "Zugticket von "
@@ -160,7 +175,8 @@ void TrainTicket::showEditor(const std::shared_ptr<BookingController> changeCont
     (new TrainTicketUi(std::static_pointer_cast<TrainTicket>(shared_from_this()), changeController))->show();
 }
 
-void serde_objects::Codec<std::shared_ptr<TrainTicket>>::serialize(std::shared_ptr<TrainTicket> &obj, serde::Encoder *encoder) {
+void serde_objects::Codec<std::shared_ptr<TrainTicket> >::serialize(std::shared_ptr<TrainTicket> &obj,
+                                                                    serde::Encoder *encoder) {
     encoder->encode<const std::string>("id", obj->getId())
             .encode<const double>("price", obj->getPrice())
             .encode<const std::string>("fromDate", obj->getFromDate())
@@ -176,7 +192,7 @@ void serde_objects::Codec<std::shared_ptr<TrainTicket>>::serialize(std::shared_p
     obj->getToStationPosition().serialize(encoder);
 }
 
-std::shared_ptr<TrainTicket> serde_objects::Codec<std::shared_ptr<TrainTicket>>::deserialize(serde::Decoder *decoder) {
+std::shared_ptr<TrainTicket> serde_objects::Codec<std::shared_ptr<TrainTicket> >::deserialize(serde::Decoder *decoder) {
     return std::make_shared<TrainTicket>(
         decoder->at<std::string>("id", {serde::validate::assertNotEmpty("ID cannot be empty")}),
         decoder->at<double>("price", {serde::validate::assertNotNan("Price cannot be NaN")}),
