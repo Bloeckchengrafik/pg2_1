@@ -4,6 +4,7 @@
 
 #include "HotelBooking.h"
 
+#include "../../geojson/GeoJsonPin.h"
 #include "../../ui/hotelbookingui.h"
 
 void serde_objects::Codec<RoomType>::serialize(RoomType &obj, serde::Encoder *encoder) {
@@ -66,6 +67,10 @@ void HotelBooking::setHotel(std::string hotel) {
 
 void HotelBooking::setTown(std::string town) {
     this->town = std::move(town);
+}
+
+void HotelBooking::intoGeoJsonElements(std::vector<std::unique_ptr<GeoJsonElement>> &vector) {
+    vector.push_back(GeoJsonPin::pin("Hotel: " + this->hotel, this->position));
 }
 
 void HotelBooking::setRoomType(RoomType roomType) {

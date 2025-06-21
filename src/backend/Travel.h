@@ -5,7 +5,7 @@
 #include "../serde/prelude.h"
 
 
-class Travel : public std::enable_shared_from_this<Travel>{
+class Travel final : public std::enable_shared_from_this<Travel>, public IntoGeoJsonElements{
     long id;
     long customerId;
     std::vector<std::shared_ptr<Booking> > travelBookings{};
@@ -29,6 +29,8 @@ public:
     std::string getEnd();
 
     void serializeAll(nlohmann::json &json, serde::Encoder* encoder);
+
+    void intoGeoJsonElements(std::vector<std::unique_ptr<GeoJsonElement>> &vector) override;
 };
 
 template<>

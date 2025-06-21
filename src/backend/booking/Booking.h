@@ -5,12 +5,13 @@
 #include <nlohmann/json.hpp>
 
 #include "../BookingController.h"
+#include "../../geojson/IntoGeoJsonElements.h"
 #include "../../serde/prelude.h"
 
 QDate parseDate(const std::string &date);
 std::string formatDate(const std::string &date);
 
-class Booking : public std::enable_shared_from_this<Booking> {
+class Booking : public std::enable_shared_from_this<Booking>, public IntoGeoJsonElements {
 protected:
     std::string id;
     double price;

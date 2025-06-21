@@ -19,7 +19,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(json)
 
 find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets WebEngineWidgets)
 qt_standard_project_setup()
 
 FILE(GLOB_RECURSE sources src/*.cpp)
@@ -32,7 +32,7 @@ qt_add_executable(
         vendor/QDarkStyleSheet/qdarkstyle/dark/darkstyle.qrc
 )
 target_link_libraries(pg2_1 PRIVATE nlohmann_json::nlohmann_json)
-target_link_libraries(pg2_1 PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(pg2_1 PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::WebEngineWidgets)
 
 qt_add_resources(pg2_1 "icons"
         PREFIX "/"

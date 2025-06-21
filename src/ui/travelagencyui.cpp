@@ -11,7 +11,7 @@
 
 TravelAgencyUi::TravelAgencyUi(std::shared_ptr<TravelAgency> agency, QWidget *parent)
     : QMainWindow(parent)
-      , ui(new Ui::TravelAgencyUi), agency(std::move(agency)) {
+      , ui(new Ui::TravelAgencyUi), mapView(new GeoJsonView(this)), agency(std::move(agency)) {
     ui->setupUi(this);
 
     connect(ui->actionReadFile, &QAction::triggered,
@@ -31,6 +31,8 @@ TravelAgencyUi::TravelAgencyUi(std::shared_ptr<TravelAgency> agency, QWidget *pa
 
     clearUi();
     ui->actionSave->setEnabled(false);
+    const auto layout = new QVBoxLayout(ui->uiFrame);
+    layout->addWidget(mapView);
 }
 
 TravelAgencyUi::~TravelAgencyUi() {
@@ -208,6 +210,10 @@ void TravelAgencyUi::displayTravel(const std::shared_ptr<Travel> &travel) {
     table->resizeColumnsToContents();
 
     this->selectedTravel = travel;
+
+    std::vector<std::unique_ptr<GeoJsonElement> > elements;
+    travel->intoGeoJsonElements(elements);
+    this->mapView->setElements(elements);
 }
 
 void TravelAgencyUi::displayBooking(const std::shared_ptr<Booking> &booking) {
