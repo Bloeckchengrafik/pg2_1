@@ -1,12 +1,18 @@
 #pragma once
 #include "Booking.h"
 #include "../../serde/prelude.h"
+#include "../coord/Position.h"
+
+typedef Position<"pickupLatitude", "pickupLongitude"> PickupPosition;
+typedef Position<"returnLatitude", "returnLongitude"> ReturnPosition;
 
 class RentalCarReservation final : public Booking {
     friend class RentalCarUi;
     std::string pickupLocation;
     std::string returnLocation;
     std::string company;
+    PickupPosition pickupPosition;
+    ReturnPosition returnPosition;
 
 public:
     RentalCarReservation(
@@ -16,7 +22,9 @@ public:
         const std::string &toDate,
         std::string pickup_location,
         std::string return_location,
-        std::string company
+        std::string company,
+        PickupPosition pickupPosition,
+        ReturnPosition returnPosition
     );
 
     std::string showDetails() override;
@@ -29,9 +37,15 @@ public:
 
     std::string &getCompany();
 
+    PickupPosition &getPickupPosition();
+
+    ReturnPosition &getReturnPosition();
+
     void setPickupLocation(std::string pickupLocation);
     void setReturnLocation(std::string returnLocation);
     void setCompany(std::string company);
+    void setPickupPosition(PickupPosition pickupPosition);
+    void setReturnPosition(ReturnPosition returnPosition);
 
     QIcon getIcon() override;
 };

@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include <ostream>
+#include <qfile.h>
 #include <nlohmann/json.hpp>
 
 #include "booking/FlightBooking.h"
@@ -86,6 +87,19 @@ void TravelAgency::mergeWith(
     }
 }
 
+TravelAgency::TravelAgency() {
+    QFile file(":/iatacodes.json");
+    file.open(QIODevice::ReadOnly);
+    auto content = file.readAll().toStdString();
+
+    for (const json contentJson = json::parse(content); json element : contentJson.array()) {
+        std::cout << contentJson << std::endl;
+        serde::json::JsonDecoder decoder(contentJson);
+        const auto airport = serde_objects::Codec<std::shared_ptr<Airport>>::deserialize(&decoder);
+        allAirports[airport->getCode()] = airport;
+    }
+}
+
 TravelAgency::~TravelAgency() {
     for (const Booking *booking: allBookings) {
         delete booking;
@@ -99,6 +113,7 @@ TravelAgency::~TravelAgency() {
     allBookings.clear();
     allCustomers.clear();
     allTravels.clear();
+    allAirports.clear();
 }
 
 std::string TravelAgency::readFile(const std::string &name) {

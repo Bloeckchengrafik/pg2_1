@@ -43,6 +43,12 @@ qt_add_resources(pg2_1 "icons"
             icons/train.svg
 )
 
+qt_add_resources(pg2_1 "resources"
+        PREFIX "/"
+        FILES
+        iatacodes.json
+)
+
 # explicit, fixed bundle identifier manually though.
 if(${QT_VERSION} VERSION_LESS 6.1.0)
     set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.test)

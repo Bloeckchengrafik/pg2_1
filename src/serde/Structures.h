@@ -17,6 +17,7 @@ namespace serde_objects {
         const auto vecEncoder = encoder->vec();
         for (auto item: obj) {
             Codec<T>::serialize(item, vecEncoder);
+            vecEncoder->vec();
         }
     }
 
@@ -26,6 +27,7 @@ namespace serde_objects {
         std::vector<T> target{};
         while (!vecDecoder->isAtEnd()) {
             target.push_back(Codec<T>::deserialize(vecDecoder));
+            vecDecoder->vec();
         }
         return target;
     }
@@ -41,6 +43,7 @@ namespace serde_objects {
         const auto vecEncoder = encoder->vec();
         for (auto& item : obj) {
             Codec<T>::serialize(item, vecEncoder);
+            vecEncoder->vec();
         }
     }
 
@@ -50,6 +53,7 @@ namespace serde_objects {
         std::vector<T> target{};
         while (!vecDecoder->isAtEnd()) {
             target.push_back(Codec<T>::deserialize(vecDecoder));
+            vecDecoder->vec();
         }
         return target;
     }

@@ -34,9 +34,10 @@ RoomType serde_objects::Codec<RoomType>::deserialize(serde::Decoder *decoder) {
 
 HotelBooking::HotelBooking(const std::string &id, const double price, const std::string &fromDate,
                            const std::string &toDate, std::string hotel, std::string town,
-                           RoomType type): Booking(id, price, fromDate, toDate),
-                                           hotel(std::move(hotel)),
-                                           town(std::move(town)), roomType(type) {
+                           RoomType type, HotelPosition pos)
+    : Booking(id, price, fromDate, toDate),
+      hotel(std::move(hotel)),
+      town(std::move(town)), roomType(type), position(pos) {
 }
 
 std::string &HotelBooking::getHotel() {
@@ -47,11 +48,15 @@ std::string &HotelBooking::getTown() {
     return town;
 }
 
+HotelPosition & HotelBooking::getPosition() {
+    return position;
+}
+
 QIcon HotelBooking::getIcon() {
     return QIcon(":/icons/bed.svg");
 }
 
-RoomType & HotelBooking::getRoomType() {
+RoomType &HotelBooking::getRoomType() {
     return roomType;
 }
 
@@ -93,6 +98,8 @@ void serde_objects::Codec<HotelBooking *>::serialize(HotelBooking *&obj, serde::
             .encode<const std::string>("hotel", obj->getHotel())
             .encode<const std::string>("town", obj->getTown())
             .encode<RoomType>("roomType", obj->getRoomType());
+
+    obj->getPosition().serialize(encoder);
 }
 
 HotelBooking *serde_objects::Codec<HotelBooking *>::deserialize(serde::Decoder *decoder) {
@@ -103,6 +110,7 @@ HotelBooking *serde_objects::Codec<HotelBooking *>::deserialize(serde::Decoder *
         decoder->at<std::string>("toDate", {serde::validate::assertNotEmpty("To date cannot be empty")}),
         decoder->at<std::string>("hotel", {serde::validate::assertNotEmpty("Hotel cannot be empty")}),
         decoder->at<std::string>("town", {serde::validate::assertNotEmpty("Town cannot be empty")}),
-        decoder->at<RoomType>("roomType")
+        decoder->at<RoomType>("roomType"),
+        HotelPosition::deserialize(decoder)
     );
 }

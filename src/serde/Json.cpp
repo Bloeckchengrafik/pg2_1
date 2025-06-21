@@ -169,11 +169,19 @@ std::string serde::json::IteratingJsonDecoder::decodeString() {
 }
 
 serde::Decoder * serde::json::IteratingJsonDecoder::vec() {
-    throw std::runtime_error("Invalid operation");
+    ++start;
+    if (start == end) return nullptr;
+    current = *start;
+    return nullptr;
 }
 
 serde::Decoder * serde::json::IteratingJsonDecoder::key(const std::string &key) {
-    throw std::runtime_error("Invalid operation");
+    if (!current.has_value()) {
+        if (start == end) return nullptr;
+        current = *start;
+    }
+
+    return new JsonDecoder(current.value().at(key));
 }
 
 bool serde::json::IteratingJsonDecoder::isAtEnd() {

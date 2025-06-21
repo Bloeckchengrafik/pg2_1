@@ -1,6 +1,7 @@
 #pragma once
 #include "Booking.h"
 #include "../../serde/prelude.h"
+#include "../coord/Position.h"
 
 enum TicketType {
     SUPER_SAVING_FIRST_CLASS,
@@ -16,14 +17,30 @@ template<> struct serde_objects::Codec<TicketType> {
     static TicketType deserialize(serde::Decoder *decoder);
 };
 
+typedef Position<"latitude", "longitude"> TrainTicketPosition;
+typedef Position<"fromStationLatitude", "fromStationLongitude"> TrainStationFromPosition;
+typedef Position<"toStationLatitude", "toStationLongitude"> TrainStationToPosition;
+
+struct TicketConnectingStation {
+    std::string station;
+    TrainTicketPosition position;
+};
+
+template<> struct serde_objects::Codec<TicketConnectingStation> {
+    static void serialize(TicketConnectingStation &obj, serde::Encoder *encoder);
+    static TicketConnectingStation deserialize(serde::Decoder *decoder);
+};
+
 class TrainTicket final : public Booking {
     friend class TrainTicketUi;
 
     std::string fromStation;
+    TrainStationFromPosition fromStationPosition;
     std::string toStation;
+    TrainStationToPosition toStationPosition;
     std::string arrivalTime;
     std::string departureTime;
-    std::vector<std::string> connectingStations;
+    std::vector<TicketConnectingStation> connectingStations;
     TicketType ticketType;
 
 public:
@@ -36,8 +53,10 @@ public:
         std::string departureTime,
         std::string fromStation,
         std::string toStation,
-        const std::vector<std::string> &connectingStations,
-        TicketType ticketType
+        const std::vector<TicketConnectingStation> &connectingStations,
+        TicketType ticketType,
+        TrainStationFromPosition fromStationPosition,
+        TrainStationToPosition toStationPosition
     );
 
     std::string showDetails() override;
@@ -52,9 +71,12 @@ public:
 
     std::string &getDepartureTime();
 
-    std::vector<std::string> &getConnectingStations();
+    std::vector<TicketConnectingStation> &getConnectingStations();
 
-    void setConnectingStations(std::vector<std::string> connectingStations);
+    TrainStationFromPosition &getFromStationPosition();
+    TrainStationToPosition &getToStationPosition();
+
+    void setConnectingStations(std::vector<TicketConnectingStation> connectingStations);
     void setFromStation(std::string fromStation);
     void setToStation(std::string toStation);
     void setArrivalTime(std::string arrivalTime);

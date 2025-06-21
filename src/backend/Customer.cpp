@@ -37,14 +37,14 @@ void Customer::serializeAll(nlohmann::json &json) {
 
 void serde_objects::Codec<Customer *>::serialize(Customer *&obj, serde::Encoder *encoder) {
     encoder->encode<const long>("customerId", obj->getId())
-            .encode<const std::string>("customerFirstname", obj->getFirstName())
-            .encode<const std::string>("customerLastname", obj->getLastName());
+            .encode<const std::string>("customerFirstName", obj->getFirstName())
+            .encode<const std::string>("customerLastName", obj->getLastName());
 }
 
 Customer *serde_objects::Codec<Customer *>::deserialize(serde::Decoder *decoder) {
     return new Customer(
         decoder->at<const long>("customerId"),
-        decoder->at<const std::string>("customerFirstname"),
-        decoder->at<const std::string>("customerLastname")
+        decoder->at<const std::string>("customerFirstName"),
+        decoder->at<const std::string>("customerLastName")
     );
 }

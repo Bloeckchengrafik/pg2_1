@@ -1,6 +1,7 @@
 #pragma once
 #include "Booking.h"
 #include "../../serde/prelude.h"
+#include "../coord/Position.h"
 
 enum BookingClass {
     ECONOMY,
@@ -9,16 +10,23 @@ enum BookingClass {
     FIRST_CLASS
 };
 
-template<> struct serde_objects::Codec<BookingClass> {
+template<>
+struct serde_objects::Codec<BookingClass> {
     static void serialize(BookingClass &obj, serde::Encoder *encoder);
+
     static BookingClass deserialize(serde::Decoder *decoder);
 };
+
+typedef Position<"fromDestLatitude", "fromDestLongitude"> FromDestPosition;
+typedef Position<"toDestLatitude", "toDestLongitude"> ToDestPosition;
 
 class FlightBooking final : public Booking {
     friend class FlightBookingUi;
 
     std::string fromDestination;
+    FromDestPosition fromDestinationPosition;
     std::string toDestination;
+    ToDestPosition toDestinationPosition;
     std::string airline;
     BookingClass bookingClass;
 
@@ -31,7 +39,9 @@ public:
         std::string fromDestination,
         std::string toDestination,
         std::string airline,
-        BookingClass bookingClass
+        BookingClass bookingClass,
+        FromDestPosition fromDestinationPosition,
+        ToDestPosition toDestinationPosition
     );
 
     std::string showDetails() override;
@@ -44,17 +54,25 @@ public:
 
     std::string &getAirline();
 
+    FromDestPosition &getFromDestPosition();
+    ToDestPosition &getToDestPosition();
+
     void setAirline(std::string airline);
+
     void setBookingClass(BookingClass bookingClass);
+
     void setFromDestination(std::string fromDestination);
+
     void setToDestination(std::string toDestination);
 
     QIcon getIcon() override;
 
-    BookingClass & getBookingClass();
+    BookingClass &getBookingClass();
 };
 
-template<> struct serde_objects::Codec<FlightBooking*> {
-    static void serialize(FlightBooking* &obj, serde::Encoder *encoder);
-    static FlightBooking* deserialize(serde::Decoder *decoder);
+template<>
+struct serde_objects::Codec<FlightBooking *> {
+    static void serialize(FlightBooking * &obj, serde::Encoder *encoder);
+
+    static FlightBooking *deserialize(serde::Decoder *decoder);
 };

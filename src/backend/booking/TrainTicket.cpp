@@ -37,18 +37,37 @@ TicketType serde_objects::Codec<TicketType>::deserialize(serde::Decoder *decoder
     throw serde::ValidationException("Invalid ticket type code");
 }
 
+void serde_objects::Codec<TicketConnectingStation>::serialize(TicketConnectingStation &obj, serde::Encoder *encoder) {
+    encoder->key("stationName")->encodeString(obj.station);
+    obj.position.serialize(encoder);
+}
+
+TicketConnectingStation serde_objects::Codec<TicketConnectingStation>::deserialize(serde::Decoder *decoder) {
+    return {
+        .station = decoder->at<std::string>("stationName", {
+                                                serde::validate::assertNotEmpty("Station name cannot be empty")
+                                            }),
+        .position = TrainTicketPosition::deserialize(decoder)
+    };
+}
+
 TrainTicket::TrainTicket(const std::string &id, const double price, const std::string &fromDate,
                          const std::string &toDate, std::string arrivalTime, std::string departureTime,
                          std::string fromStation,
                          std::string toStation,
-                         const std::vector<std::string> &connectingStations,
-                         TicketType type): Booking(id, price, fromDate, toDate),
-                                           fromStation(std::move(fromStation)),
-                                           toStation(std::move(toStation)),
-                                           arrivalTime(std::move(arrivalTime)),
-                                           departureTime(std::move(departureTime)),
-                                           connectingStations(connectingStations),
-                                           ticketType(type) {
+                         const std::vector<TicketConnectingStation> &connectingStations,
+                         TicketType type,
+                         TrainStationFromPosition fromStationPosition,
+                         TrainStationToPosition toStationPosition
+): Booking(id, price, fromDate, toDate),
+   fromStation(std::move(fromStation)),
+   toStation(std::move(toStation)),
+   arrivalTime(std::move(arrivalTime)),
+   departureTime(std::move(departureTime)),
+   connectingStations(connectingStations),
+   ticketType(type),
+   fromStationPosition(fromStationPosition),
+   toStationPosition(toStationPosition) {
 }
 
 std::string &TrainTicket::getFromStation() {
@@ -67,11 +86,19 @@ std::string &TrainTicket::getDepartureTime() {
     return departureTime;
 }
 
-std::vector<std::string> &TrainTicket::getConnectingStations() {
+std::vector<TicketConnectingStation> &TrainTicket::getConnectingStations() {
     return connectingStations;
 }
 
-void TrainTicket::setConnectingStations(std::vector<std::string> connectingStations) {
+TrainStationFromPosition &TrainTicket::getFromStationPosition() {
+    return fromStationPosition;
+}
+
+TrainStationToPosition &TrainTicket::getToStationPosition() {
+    return toStationPosition;
+}
+
+void TrainTicket::setConnectingStations(std::vector<TicketConnectingStation> connectingStations) {
     this->connectingStations = std::move(connectingStations);
 }
 
@@ -117,7 +144,7 @@ std::string TrainTicket::showDetails() {
         out << " über ";
 
         for (auto station = this->connectingStations.begin(); station != this->connectingStations.end(); ++station) {
-            out << *station;
+            out << station->station;
             if (station != this->connectingStations.end() - 1) {
                 out << ", ";
             }
@@ -142,8 +169,11 @@ void serde_objects::Codec<TrainTicket *>::serialize(TrainTicket *&obj, serde::En
             .encode<const std::string>("departureTime", obj->getDepartureTime())
             .encode<const std::string>("fromStation", obj->getFromStation())
             .encode<const std::string>("toStation", obj->getToStation())
-            .encode<const std::vector<std::string>>("connectingStations", obj->getConnectingStations())
+            .encode<const std::vector<TicketConnectingStation>>("connectingStations", obj->getConnectingStations())
             .encode<TicketType>("ticketType", obj->getTicketType());
+
+    obj->getFromStationPosition().serialize(encoder);
+    obj->getToStationPosition().serialize(encoder);
 }
 
 TrainTicket *serde_objects::Codec<TrainTicket *>::deserialize(serde::Decoder *decoder) {
@@ -156,12 +186,9 @@ TrainTicket *serde_objects::Codec<TrainTicket *>::deserialize(serde::Decoder *de
         decoder->at<std::string>("departureTime", {serde::validate::assertNotEmpty("Departure time cannot be empty")}),
         decoder->at<std::string>("fromStation", {serde::validate::assertNotEmpty("From station cannot be empty")}),
         decoder->at<std::string>("toStation", {serde::validate::assertNotEmpty("To station cannot be empty")}),
-        decoder->at<std::vector<std::string> >("connectingStations", {
-                                                   serde::validate::indexed({
-                                                       serde::validate::assertNotEmpty(
-                                                           "Connecting station cannot be empty")
-                                                   })
-                                               }),
-        decoder->at<TicketType>("ticketType")
+        decoder->at<std::vector<TicketConnectingStation> >("connectingStations"),
+        decoder->at<TicketType>("ticketType"),
+        TrainStationFromPosition::deserialize(decoder),
+        TrainStationToPosition::deserialize(decoder)
     );
 }

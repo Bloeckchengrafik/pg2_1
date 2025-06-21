@@ -5,11 +5,15 @@ RentalCarReservation::RentalCarReservation(
     const std::string &id, const double price, const std::string &fromDate,
     const std::string &toDate, std::string pickup_location,
     std::string return_location,
-    std::string company
+    std::string company,
+    PickupPosition pickupPosition,
+    ReturnPosition returnPosition
 ): Booking(id, price, fromDate, toDate),
    pickupLocation(std::move(pickup_location)),
    returnLocation(std::move(return_location)),
-   company(std::move(company)) {
+   company(std::move(company)),
+   pickupPosition(pickupPosition),
+   returnPosition(returnPosition) {
 }
 
 std::string &RentalCarReservation::getPickupLocation() {
@@ -34,6 +38,22 @@ void RentalCarReservation::setReturnLocation(std::string returnLocation) {
 
 void RentalCarReservation::setCompany(std::string company) {
     this->company = std::move(company);
+}
+
+PickupPosition &RentalCarReservation::getPickupPosition() {
+    return pickupPosition;
+}
+
+ReturnPosition &RentalCarReservation::getReturnPosition() {
+    return returnPosition;
+}
+
+void RentalCarReservation::setPickupPosition(PickupPosition pickupPosition) {
+    this->pickupPosition = pickupPosition;
+}
+
+void RentalCarReservation::setReturnPosition(ReturnPosition returnPosition) {
+    this->returnPosition = returnPosition;
 }
 
 QIcon RentalCarReservation::getIcon() {
@@ -67,6 +87,9 @@ void serde_objects::Codec<RentalCarReservation *>::serialize(RentalCarReservatio
             .encode<const std::string>("pickupLocation", obj->getPickupLocation())
             .encode<const std::string>("returnLocation", obj->getReturnLocation())
             .encode<const std::string>("company", obj->getCompany());
+
+    obj->getPickupPosition().serialize(encoder);
+    obj->getReturnPosition().serialize(encoder);
 }
 
 RentalCarReservation *serde_objects::Codec<RentalCarReservation *>::deserialize(serde::Decoder *decoder) {
@@ -77,6 +100,8 @@ RentalCarReservation *serde_objects::Codec<RentalCarReservation *>::deserialize(
         decoder->at<std::string>("toDate", {serde::validate::assertNotEmpty("To date cannot be empty")}),
         decoder->at<std::string>("pickupLocation", {serde::validate::assertNotEmpty("Pickup location cannot be empty")}),
         decoder->at<std::string>("returnLocation", {serde::validate::assertNotEmpty("Return location cannot be empty")}),
-        decoder->at<std::string>("company", {serde::validate::assertNotEmpty("Company cannot be empty")})
+        decoder->at<std::string>("company", {serde::validate::assertNotEmpty("Company cannot be empty")}),
+        PickupPosition::deserialize(decoder),
+        ReturnPosition::deserialize(decoder)
     );
 }

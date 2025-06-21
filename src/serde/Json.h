@@ -98,6 +98,7 @@ namespace serde::json {
     class IteratingJsonDecoder final : public Decoder {
         nlohmann::json::iterator start;
         nlohmann::json::iterator end;
+        std::optional<nlohmann::json> current = std::nullopt;
 
     public:
         explicit IteratingJsonDecoder(const nlohmann::json::iterator &start, const nlohmann::json::iterator &end)

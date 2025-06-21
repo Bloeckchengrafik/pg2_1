@@ -27,6 +27,7 @@ BookingClass serde_objects::Codec<BookingClass>::deserialize(serde::Decoder *dec
     if (str == "Y") return ECONOMY;
     if (str == "W") return PREMIUM_ECONOMY;
     if (str == "J") return BUSINESS;
+    if (str == "B") return BUSINESS;
     if (str == "F") return FIRST_CLASS;
     throw serde::ValidationException("Invalid booking class code");
 }
@@ -34,10 +35,15 @@ BookingClass serde_objects::Codec<BookingClass>::deserialize(serde::Decoder *dec
 FlightBooking::FlightBooking(
     const std::string &id, const double price, const std::string &fromDate,
     const std::string &toDate, std::string fromDestination, std::string toDestination,
-    std::string airline, BookingClass bookingClass): Booking(id, price, fromDate, toDate),
-                                                     fromDestination(std::move(fromDestination)),
-                                                     toDestination(std::move(toDestination)),
-                                                     airline(std::move(airline)), bookingClass(bookingClass) {
+    std::string airline, BookingClass bookingClass,
+    FromDestPosition from,
+    ToDestPosition to
+)
+    : Booking(id, price, fromDate, toDate),
+      fromDestination(std::move(fromDestination)), fromDestinationPosition(from),
+      toDestination(std::move(toDestination)), toDestinationPosition(to),
+      airline(std::move(airline)),
+      bookingClass(bookingClass) {
 }
 
 std::string &FlightBooking::getFromDestination() {
@@ -50,6 +56,14 @@ std::string &FlightBooking::getToDestination() {
 
 std::string &FlightBooking::getAirline() {
     return airline;
+}
+
+FromDestPosition &FlightBooking::getFromDestPosition() {
+    return fromDestinationPosition;
+}
+
+ToDestPosition &FlightBooking::getToDestPosition() {
+    return toDestinationPosition;
 }
 
 void FlightBooking::setAirline(std::string airline) {
@@ -72,7 +86,7 @@ QIcon FlightBooking::getIcon() {
     return QIcon(":icons/airplane-in-flight.svg");
 }
 
-BookingClass & FlightBooking::getBookingClass() {
+BookingClass &FlightBooking::getBookingClass() {
     return bookingClass;
 }
 
@@ -103,6 +117,9 @@ void serde_objects::Codec<FlightBooking *>::serialize(FlightBooking *&obj, serde
             .encode<const std::string>("toDest", obj->getToDestination())
             .encode<const std::string>("airline", obj->getAirline())
             .encode<BookingClass>("bookingClass", obj->getBookingClass());
+
+    obj->getFromDestPosition().serialize(encoder);
+    obj->getToDestPosition().serialize(encoder);
 }
 
 FlightBooking *serde_objects::Codec<FlightBooking *>::deserialize(serde::Decoder *decoder) {
@@ -120,6 +137,8 @@ FlightBooking *serde_objects::Codec<FlightBooking *>::deserialize(serde::Decoder
                                      serde::validate::assertLength(3, "To destination must be 3 characters")
                                  }),
         decoder->at<std::string>("airline", {serde::validate::assertNotEmpty("Airline cannot be empty")}),
-        decoder->at<BookingClass>("bookingClass")
+        decoder->at<BookingClass>("bookingClass"),
+        FromDestPosition::deserialize(decoder),
+        ToDestPosition::deserialize(decoder)
     );
 }

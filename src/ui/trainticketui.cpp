@@ -22,7 +22,7 @@ TrainTicketUi::TrainTicketUi(TrainTicket *booking, ChangeController *changeContr
 
     QStringList connectingStationList;
     for (const auto &station: booking->getConnectingStations()) {
-        connectingStationList.append(QString::fromStdString(station));
+        connectingStationList.append(QString::fromStdString(station.station));
     }
 
     const auto connectingStationsModel = new QStringListModel(this);
@@ -92,7 +92,10 @@ void TrainTicketUi::onChosenConnectingStations(QModelIndex index) {
                                             index.data().toString(), &ok);
     if (ok && !station.isEmpty()) {
         auto stations = booking->getConnectingStations();
-        stations[index.row()] = station.toStdString();
+        stations[index.row()] = {
+            .station = station.toStdString(),
+            .position = stations[index.row()].position,
+        };
         booking->setConnectingStations(stations);
         updateConnectingStationsModel();
         changeController->onChange();
@@ -106,7 +109,6 @@ void TrainTicketUi::onAddStation() {
                                             "", &ok);
     if (ok && !station.isEmpty()) {
         auto stations = booking->getConnectingStations();
-        stations.push_back(station.toStdString());
         booking->setConnectingStations(stations);
         updateConnectingStationsModel();
         changeController->onChange();
@@ -116,7 +118,7 @@ void TrainTicketUi::onAddStation() {
 void TrainTicketUi::updateConnectingStationsModel() {
     QStringList connectingStationList;
     for (const auto &station: booking->getConnectingStations()) {
-        connectingStationList.append(QString::fromStdString(station));
+        connectingStationList.append(QString::fromStdString(station.station));
     }
     auto *model = qobject_cast<QStringListModel *>(ui->connectingStations->model());
     model->setStringList(connectingStationList);
