@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>453</width>
-    <height>386</height>
+    <height>425</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -35,6 +35,13 @@
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QLabel" name="labelFrom">
+          <property name="text">
+           <string>TextLabel</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </widget>
      </item>
@@ -48,6 +55,13 @@
          <widget class="QLineEdit" name="toDestination">
           <property name="maxLength">
            <number>3</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="labelTo">
+          <property name="text">
+           <string>TextLabel</string>
           </property>
          </widget>
         </item>

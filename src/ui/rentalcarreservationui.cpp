@@ -9,7 +9,7 @@
 #include "../backend/booking/Booking.h"
 
 
-RentalCarReservationUi::RentalCarReservationUi(RentalCarReservation *res, ChangeController *changeController, QWidget *parent) :
+RentalCarReservationUi::RentalCarReservationUi(const std::shared_ptr<RentalCarReservation> &res, const std::shared_ptr<BookingController> &changeController, QWidget *parent) :
     QWidget(parent), ui(new Ui::RentalCarReservationUi), res(res), changeController(changeController) {
     ui->setupUi(this);
     ui->companyName->setText(QString::fromStdString(res->getCompany()));

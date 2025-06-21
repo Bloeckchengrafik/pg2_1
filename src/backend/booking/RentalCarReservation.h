@@ -29,7 +29,7 @@ public:
 
     std::string showDetails() override;
 
-    void showEditor(ChangeController *changeController) override;
+    void showEditor(std::shared_ptr<BookingController> changeController) override;
 
     std::string &getPickupLocation();
 
@@ -50,7 +50,7 @@ public:
     QIcon getIcon() override;
 };
 
-template<> struct serde_objects::Codec<RentalCarReservation*> {
-    static void serialize(RentalCarReservation* &obj, serde::Encoder *encoder);
-    static RentalCarReservation* deserialize(serde::Decoder *decoder);
+template<> struct serde_objects::Codec<std::shared_ptr<RentalCarReservation>> {
+    static void serialize(std::shared_ptr<RentalCarReservation> &obj, serde::Encoder *encoder);
+    static std::shared_ptr<RentalCarReservation> deserialize(serde::Decoder *decoder);
 };

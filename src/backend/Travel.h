@@ -5,10 +5,10 @@
 #include "../serde/prelude.h"
 
 
-class Travel {
+class Travel : public std::enable_shared_from_this<Travel>{
     long id;
     long customerId;
-    std::vector<Booking *> travelBookings{};
+    std::vector<std::shared_ptr<Booking> > travelBookings{};
 
 public:
     Travel(const long id, const long customerId) : id(id), customerId(customerId) {
@@ -18,9 +18,9 @@ public:
 
     long getCustomerId() const;
 
-    void addBooking(Booking *booking);
+    void addBooking(std::shared_ptr<Booking> booking);
 
-    std::vector<Booking *> &getBookings();
+    std::vector<std::shared_ptr<Booking>> &getBookings();
 
     bool operator==(const Travel &other) const;
 
@@ -32,8 +32,8 @@ public:
 };
 
 template<>
-struct serde_objects::Codec<Travel *> {
-    static void serialize(Travel * &obj, serde::Encoder *encoder);
+struct serde_objects::Codec<std::shared_ptr<Travel>> {
+    static void serialize(std::shared_ptr<Travel> &obj, serde::Encoder *encoder);
 
-    static Travel *deserialize(serde::Decoder *decoder);
+    static std::shared_ptr<Travel> deserialize(serde::Decoder *decoder);
 };

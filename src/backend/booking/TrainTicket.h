@@ -61,7 +61,7 @@ public:
 
     std::string showDetails() override;
 
-    void showEditor(ChangeController *changeController) override;
+    void showEditor(std::shared_ptr<BookingController> changeController) override;
 
     std::string &getFromStation();
 
@@ -89,7 +89,7 @@ public:
 };
 
 
-template<> struct serde_objects::Codec<TrainTicket*> {
-    static void serialize(TrainTicket* &obj, serde::Encoder *encoder);
-    static TrainTicket* deserialize(serde::Decoder *decoder);
+template<> struct serde_objects::Codec<std::shared_ptr<TrainTicket>> {
+    static void serialize(std::shared_ptr<TrainTicket> &obj, serde::Encoder *encoder);
+    static std::shared_ptr<TrainTicket> deserialize(serde::Decoder *decoder);
 };

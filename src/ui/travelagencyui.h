@@ -14,14 +14,15 @@ namespace Ui {
 
 typedef std::string (TravelAgency::*ReadFunc)(const std::string &name);
 
-class TravelAgencyUi : public QMainWindow, public ChangeController {
+class TravelAgencyUi : public QMainWindow, public BookingController, public std::enable_shared_from_this<TravelAgencyUi> {
     Q_OBJECT
 
 public:
-    explicit TravelAgencyUi(TravelAgency *agency, QWidget *parent = nullptr);
+    explicit TravelAgencyUi(std::shared_ptr<TravelAgency> agency, QWidget *parent = nullptr);
     ~TravelAgencyUi() override;
 
     void onChange() override;
+    std::optional<std::shared_ptr<Airport>> getAirport(std::string &code) override;
 
 private slots:
     void onSave();
@@ -32,17 +33,17 @@ private slots:
 
 private:
     Ui::TravelAgencyUi *ui;
-    TravelAgency *agency;
-    Customer *selectedCustomer;
-    Travel *selectedTravel;
+    std::shared_ptr<TravelAgency> agency;
+    std::optional<std::shared_ptr<Customer>> selectedCustomer;
+    std::optional<std::shared_ptr<Travel>> selectedTravel;
     bool allowSave = false;
 
     void readFile(ReadFunc func, const std::string &name);
 
     void clearUi();
-    void displayCustomer(Customer *customer);
-    void displayTravel(Travel *travel);
-    void displayBooking(Booking *booking);
+    void displayCustomer(const std::shared_ptr<Customer> &customer);
+    void displayTravel(const std::shared_ptr<Travel> &travel);
+    void displayBooking(const std::shared_ptr<Booking> &booking);
 };
 
 #endif // TRAVELAGENCYUI_H

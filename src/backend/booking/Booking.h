@@ -4,13 +4,13 @@
 #include <utility>
 #include <nlohmann/json.hpp>
 
-#include "../ChangeController.h"
+#include "../BookingController.h"
 #include "../../serde/prelude.h"
 
 QDate parseDate(const std::string &date);
 std::string formatDate(const std::string &date);
 
-class Booking {
+class Booking : public std::enable_shared_from_this<Booking> {
 protected:
     std::string id;
     double price;
@@ -29,7 +29,7 @@ public:
     virtual ~Booking() = default;
 
     virtual std::string showDetails() = 0;
-    virtual void showEditor(ChangeController *changeController) = 0;
+    virtual void showEditor(std::shared_ptr<BookingController> changeController) = 0;
     virtual QIcon getIcon() = 0;
 
     [[nodiscard]] double getPrice();

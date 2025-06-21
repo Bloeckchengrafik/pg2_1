@@ -9,7 +9,8 @@
 #include "../backend/booking/Booking.h"
 
 
-HotelBookingUi::HotelBookingUi(HotelBooking *booking, ChangeController *changeController,
+HotelBookingUi::HotelBookingUi(const std::shared_ptr<HotelBooking> &booking,
+                               const std::shared_ptr<BookingController> &changeController,
                                QWidget *parent) : QWidget(parent), ui(new Ui::HotelBookingUi), booking(booking),
                                                   changeController(changeController) {
     ui->setupUi(this);

@@ -6,7 +6,7 @@
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
-    const auto agency = new TravelAgency();
+    const auto agency = std::make_shared<TravelAgency>();
     QFile f(":qdarkstyle/dark/darkstyle.qss");
     if (!f.exists())
     {
@@ -18,9 +18,7 @@ int main(int argc, char *argv[]) {
         QTextStream ts(&f);
         app.setStyleSheet(ts.readAll());
     }
-    TravelAgencyUi ui(agency);
-    ui.show();
-    const int exit = QApplication::exec();
-    delete agency;
-    return exit;
+    const auto ui = std::make_shared<TravelAgencyUi>(agency);
+    ui->show();
+    return QApplication::exec();
 }

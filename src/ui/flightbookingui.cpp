@@ -8,9 +8,9 @@
 #include "ui_flightbookingui.h"
 
 
-FlightBookingUi::FlightBookingUi(FlightBooking *booking, ChangeController *changeController,
+FlightBookingUi::FlightBookingUi(const std::shared_ptr<FlightBooking> &booking, const std::shared_ptr<BookingController> &bookingController,
                                  QWidget *parent) : QWidget(parent), ui(new Ui::FlightBookingUi), booking(booking),
-                                                    changeController(changeController) {
+                                                    bookingController(bookingController) {
     ui->setupUi(this);
     ui->fromDestination->setText(QString::fromStdString(booking->getFromDestination()));
     ui->toDestination->setText(QString::fromStdString(booking->getToDestination()));
@@ -22,6 +22,12 @@ FlightBookingUi::FlightBookingUi(FlightBooking *booking, ChangeController *chang
     ui->type->addItem("Business", QVariant::fromValue(BUSINESS));
     ui->type->addItem("First Class", QVariant::fromValue(FIRST_CLASS));
     ui->type->setCurrentIndex(booking->getBookingClass());
+
+    ui->labelFrom->setTextFormat(Qt::MarkdownText);
+    ui->labelTo->setTextFormat(Qt::MarkdownText);
+
+    updateStationFrom(booking->getFromDestination());
+    updateStationTo(booking->getToDestination());
 
     connect(ui->fromDestination, &QLineEdit::textChanged, this, &FlightBookingUi::onSetFromStation);
     connect(ui->toDestination, &QLineEdit::textChanged, this, &FlightBookingUi::onSetToStation);
@@ -36,31 +42,66 @@ FlightBookingUi::~FlightBookingUi() {
 }
 
 void FlightBookingUi::onSetFromStation(QString station) {
-    booking->setFromDestination(station.toStdString());
-    changeController->onChange();
+    auto stationStr = station.toStdString();
+    if (!updateStationFrom(stationStr)) return;
+    booking->setFromDestination(stationStr);
+    bookingController->onChange();
 }
 
 void FlightBookingUi::onSetToStation(QString station) {
+    auto stationStr = station.toStdString();
+    if (!updateStationTo(stationStr)) return;
     booking->setToDestination(station.toStdString());
-    changeController->onChange();
+    bookingController->onChange();
 }
 
 void FlightBookingUi::onSetAirline(QString airline) {
     booking->setAirline(airline.toStdString());
-    changeController->onChange();
+    bookingController->onChange();
 }
 
 void FlightBookingUi::onSetDate(QDate date) {
     booking->setFromDate(date.toString("yyyyMMdd").toStdString());
-    changeController->onChange();
+    bookingController->onChange();
 }
 
 void FlightBookingUi::onSetPrice(double amount) {
     booking->setPrice(amount);
-    changeController->onChange();
+    bookingController->onChange();
 }
 
 void FlightBookingUi::onSetBookingClass(int index) {
     booking->setBookingClass(static_cast<BookingClass>(index));
-    changeController->onChange();
+    bookingController->onChange();
+}
+
+bool FlightBookingUi::updateStationFrom(std::string &code) {
+    const auto airport = this->bookingController->getAirport(code);
+    if (airport.has_value()) {
+        setOkState(ui->labelFrom, airport.value());
+        return true;
+    }
+
+    setErrorState(ui->labelFrom);
+    return false;
+}
+
+bool FlightBookingUi::updateStationTo(std::string &code) {
+    const auto airport = this->bookingController->getAirport(code);
+    if (airport.has_value()) {
+        setOkState(ui->labelTo, airport.value());
+        return true;
+    }
+
+    setErrorState(ui->labelTo);
+    return false;
+}
+
+
+void FlightBookingUi::setErrorState(QLabel *label) {
+    label->setText("<span style=\"color:#bf616a;\">Invalid IATA Code</span>");
+}
+
+void FlightBookingUi::setOkState(QLabel *label, std::shared_ptr<Airport> airport) {
+    label->setText((airport->getName() + " (" + airport->getIso() + ")").data());
 }

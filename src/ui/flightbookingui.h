@@ -5,10 +5,11 @@
 #ifndef FLIGHTBOOKINGUI_H
 #define FLIGHTBOOKINGUI_H
 
-#include <QWidget>
 #include <QDate>
+#include <QLabel>
 
 #include "../backend/booking/FlightBooking.h"
+#include "../backend/coord/Airport.h"
 
 
 QT_BEGIN_NAMESPACE
@@ -19,7 +20,7 @@ class FlightBookingUi : public QWidget {
 Q_OBJECT
 
 public:
-    explicit FlightBookingUi(FlightBooking *booking, ChangeController *changeController, QWidget *parent = nullptr);
+    explicit FlightBookingUi(const std::shared_ptr<FlightBooking> &booking, const std::shared_ptr<BookingController> &bookingController, QWidget *parent = nullptr);
     ~FlightBookingUi() override;
 
 public slots:
@@ -32,8 +33,14 @@ public slots:
 
 private:
     Ui::FlightBookingUi *ui;
-    FlightBooking *booking;
-    ChangeController *changeController;
+    std::shared_ptr<FlightBooking> booking;
+    std::shared_ptr<BookingController> bookingController;
+
+    bool updateStationFrom(std::string& code);
+    bool updateStationTo(std::string& code);
+
+    void setErrorState(QLabel *label);
+    void setOkState(QLabel *label, std::shared_ptr<Airport>);
 };
 
 

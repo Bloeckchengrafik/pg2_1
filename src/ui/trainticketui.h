@@ -23,22 +23,22 @@ class TrainTicketUi : public QWidget {
     Q_OBJECT
 
 public:
-    explicit TrainTicketUi(TrainTicket *booking, ChangeController *changeController, QWidget *parent = nullptr);
+    explicit TrainTicketUi(const std::shared_ptr<TrainTicket> &booking, const std::shared_ptr<BookingController> &changeController, QWidget *parent = nullptr);
 
     ~TrainTicketUi() override;
 
 public slots:
-    void onChangeFromStation(QString station);
+    void onChangeFromStation(QString station) const;
 
-    void onChangeToStation(QString station);
+    void onChangeToStation(QString station) const;
 
-    void onChangeFromDate(QDateTime station);
+    void onChangeFromDate(QDateTime station) const;
 
-    void onChangeToDate(QDateTime station);
+    void onChangeToDate(QDateTime station) const;
 
-    void onChangeType(int index);
+    void onChangeType(int index) const;
 
-    void onChangePrice(double amount);
+    void onChangePrice(double amount) const;
 
     void onChosenConnectingStations(QModelIndex index);
 
@@ -46,10 +46,10 @@ public slots:
 
 private:
     Ui::TrainTicketUi *ui;
-    TrainTicket *booking;
-    ChangeController *changeController;
+    std::shared_ptr<TrainTicket> booking;
+    std::shared_ptr<BookingController> changeController;
 
-    void updateConnectingStationsModel();
+    void updateConnectingStationsModel() const;
 };
 
 

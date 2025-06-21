@@ -74,12 +74,11 @@ std::string RentalCarReservation::showDetails() {
     return out.str();
 }
 
-void RentalCarReservation::showEditor(ChangeController *changeController) {
-    const auto ui = new RentalCarReservationUi(this, changeController);
-    ui->show();
+void RentalCarReservation::showEditor(std::shared_ptr<BookingController> changeController) {
+    (new RentalCarReservationUi(std::static_pointer_cast<RentalCarReservation>(shared_from_this()), changeController))->show();
 }
 
-void serde_objects::Codec<RentalCarReservation *>::serialize(RentalCarReservation *&obj, serde::Encoder *encoder) {
+void serde_objects::Codec<std::shared_ptr<RentalCarReservation>>::serialize(std::shared_ptr<RentalCarReservation> &obj, serde::Encoder *encoder) {
     encoder->encode<const std::string>("id", obj->getId())
             .encode<const double>("price", obj->getPrice())
             .encode<const std::string>("fromDate", obj->getFromDate())
@@ -92,8 +91,8 @@ void serde_objects::Codec<RentalCarReservation *>::serialize(RentalCarReservatio
     obj->getReturnPosition().serialize(encoder);
 }
 
-RentalCarReservation *serde_objects::Codec<RentalCarReservation *>::deserialize(serde::Decoder *decoder) {
-    return new RentalCarReservation(
+std::shared_ptr<RentalCarReservation> serde_objects::Codec<std::shared_ptr<RentalCarReservation>>::deserialize(serde::Decoder *decoder) {
+    return std::make_shared<RentalCarReservation>(
         decoder->at<std::string>("id", {serde::validate::assertNotEmpty("ID cannot be empty")}),
         decoder->at<double>("price", {serde::validate::assertNotNan("Price cannot be NaN")}),
         decoder->at<std::string>("fromDate", {serde::validate::assertNotEmpty("From date cannot be empty")}),

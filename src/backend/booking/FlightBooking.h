@@ -46,7 +46,7 @@ public:
 
     std::string showDetails() override;
 
-    void showEditor(ChangeController *changeController) override;
+    void showEditor(std::shared_ptr<BookingController> changeController) override;
 
     std::string &getFromDestination();
 
@@ -71,8 +71,8 @@ public:
 };
 
 template<>
-struct serde_objects::Codec<FlightBooking *> {
-    static void serialize(FlightBooking * &obj, serde::Encoder *encoder);
+struct serde_objects::Codec<std::shared_ptr<FlightBooking>> {
+    static void serialize(std::shared_ptr<FlightBooking> &obj, serde::Encoder *encoder);
 
-    static FlightBooking *deserialize(serde::Decoder *decoder);
+    static std::shared_ptr<FlightBooking> deserialize(serde::Decoder *decoder);
 };

@@ -104,11 +104,11 @@ std::string FlightBooking::showDetails() {
     return out.str();
 }
 
-void FlightBooking::showEditor(ChangeController *changeController) {
-    (new FlightBookingUi(this, changeController))->show();
+void FlightBooking::showEditor(std::shared_ptr<BookingController> changeController) {
+    (new FlightBookingUi(std::static_pointer_cast<FlightBooking>(shared_from_this()), changeController))->show();
 }
 
-void serde_objects::Codec<FlightBooking *>::serialize(FlightBooking *&obj, serde::Encoder *encoder) {
+void serde_objects::Codec<std::shared_ptr<FlightBooking>>::serialize(std::shared_ptr<FlightBooking> &obj, serde::Encoder *encoder) {
     encoder->encode<const std::string>("id", obj->getId())
             .encode<const double>("price", obj->getPrice())
             .encode<const std::string>("fromDate", obj->getFromDate())
@@ -122,8 +122,8 @@ void serde_objects::Codec<FlightBooking *>::serialize(FlightBooking *&obj, serde
     obj->getToDestPosition().serialize(encoder);
 }
 
-FlightBooking *serde_objects::Codec<FlightBooking *>::deserialize(serde::Decoder *decoder) {
-    return new FlightBooking(
+std::shared_ptr<FlightBooking> serde_objects::Codec<std::shared_ptr<FlightBooking>>::deserialize(serde::Decoder *decoder) {
+    return std::make_shared<FlightBooking>(
         decoder->at<std::string>("id", {serde::validate::assertNotEmpty("ID cannot be empty")}),
         decoder->at<double>("price", {serde::validate::assertNotNan("Price cannot be NaN")}),
         decoder->at<std::string>("fromDate", {serde::validate::assertNotEmpty("From date cannot be empty")}),

@@ -156,11 +156,11 @@ std::string TrainTicket::showDetails() {
     return out.str();
 }
 
-void TrainTicket::showEditor(ChangeController *changeController) {
-    (new TrainTicketUi(this, changeController))->show();
+void TrainTicket::showEditor(const std::shared_ptr<BookingController> changeController) {
+    (new TrainTicketUi(std::static_pointer_cast<TrainTicket>(shared_from_this()), changeController))->show();
 }
 
-void serde_objects::Codec<TrainTicket *>::serialize(TrainTicket *&obj, serde::Encoder *encoder) {
+void serde_objects::Codec<std::shared_ptr<TrainTicket>>::serialize(std::shared_ptr<TrainTicket> &obj, serde::Encoder *encoder) {
     encoder->encode<const std::string>("id", obj->getId())
             .encode<const double>("price", obj->getPrice())
             .encode<const std::string>("fromDate", obj->getFromDate())
@@ -176,8 +176,8 @@ void serde_objects::Codec<TrainTicket *>::serialize(TrainTicket *&obj, serde::En
     obj->getToStationPosition().serialize(encoder);
 }
 
-TrainTicket *serde_objects::Codec<TrainTicket *>::deserialize(serde::Decoder *decoder) {
-    return new TrainTicket(
+std::shared_ptr<TrainTicket> serde_objects::Codec<std::shared_ptr<TrainTicket>>::deserialize(serde::Decoder *decoder) {
+    return std::make_shared<TrainTicket>(
         decoder->at<std::string>("id", {serde::validate::assertNotEmpty("ID cannot be empty")}),
         decoder->at<double>("price", {serde::validate::assertNotNan("Price cannot be NaN")}),
         decoder->at<std::string>("fromDate", {serde::validate::assertNotEmpty("From date cannot be empty")}),

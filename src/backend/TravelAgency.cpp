@@ -14,8 +14,8 @@
 
 using json = nlohmann::json;
 
-std::string getMetadata(const std::vector<Booking *> &bookings, const std::vector<Customer *> &customers,
-                        const std::vector<Travel *> &travels) {
+std::string getMetadata(const std::vector<std::shared_ptr<Booking>> &bookings, const std::vector<std::shared_ptr<Customer>> &customers,
+                        const std::vector<std::shared_ptr<Travel>> &travels) {
     double priceFlight = 0;
     double priceRentalCar = 0;
     double priceHotel = 0;
@@ -27,16 +27,16 @@ std::string getMetadata(const std::vector<Booking *> &bookings, const std::vecto
     int countTrain = 0;
 
     for (const auto booking: bookings) {
-        if (dynamic_cast<FlightBooking *>(booking) != nullptr) {
+        if (std::dynamic_pointer_cast<FlightBooking>(booking) != nullptr) {
             countFlight++;
             priceFlight += booking->getPrice();
-        } else if (dynamic_cast<RentalCarReservation *>(booking) != nullptr) {
+        } else if (std::dynamic_pointer_cast<RentalCarReservation>(booking) != nullptr) {
             countRentalCar++;
             priceRentalCar += booking->getPrice();
-        } else if (dynamic_cast<HotelBooking *>(booking) != nullptr) {
+        } else if (std::dynamic_pointer_cast<HotelBooking>(booking) != nullptr) {
             countHotel++;
             priceHotel += booking->getPrice();
-        } else if (dynamic_cast<TrainTicket *>(booking) != nullptr) {
+        } else if (std::dynamic_pointer_cast<TrainTicket>(booking) != nullptr) {
             countTrain++;
             priceTrain += booking->getPrice();
         }
@@ -50,11 +50,11 @@ std::string getMetadata(const std::vector<Booking *> &bookings, const std::vecto
 
     out << "Es wurden " << travels.size() << " Reisen und " << customers.size() << " Kunden angelegt" << std::endl;
 
-    out << "Kunde 1 hat " << std::ranges::count_if(travels, [](const Travel *travel) {
+    out << "Kunde 1 hat " << std::ranges::count_if(travels, [](const std::shared_ptr<Travel> &travel) {
         return travel->getCustomerId() == 1;
     }) << " Reisen gebucht" << std::endl;
 
-    out << "Zur Reise ID 17 gehören " << (*std::ranges::find_if(travels, [](const Travel *travel) {
+    out << "Zur Reise ID 17 gehören " << (*std::ranges::find_if(travels, [](const std::shared_ptr<Travel> &travel) {
         return travel->getId() == 17;
     }))->getBookings().size() << " Buchungen" << std::endl;
 
@@ -62,9 +62,9 @@ std::string getMetadata(const std::vector<Booking *> &bookings, const std::vecto
 }
 
 void TravelAgency::mergeWith(
-    const std::vector<Booking *> &vector,
-    const std::vector<Customer *> &customers,
-    const std::vector<Travel *> &travels
+    const std::vector<std::shared_ptr<Booking> > &vector,
+    const std::vector<std::shared_ptr<Customer> > &customers,
+    const std::vector<std::shared_ptr<Travel> > &travels
 ) {
     for (const auto booking: vector) {
         allBookings.push_back(booking);
@@ -91,25 +91,15 @@ TravelAgency::TravelAgency() {
     QFile file(":/iatacodes.json");
     file.open(QIODevice::ReadOnly);
     auto content = file.readAll().toStdString();
-
-    for (const json contentJson = json::parse(content); json element : contentJson.array()) {
-        std::cout << contentJson << std::endl;
-        serde::json::JsonDecoder decoder(contentJson);
-        const auto airport = serde_objects::Codec<std::shared_ptr<Airport>>::deserialize(&decoder);
+    const json contentJson = json::parse(content);
+    serde::json::JsonDecoder decoder(contentJson);
+    for (const std::shared_ptr airport:
+         serde_objects::Codec<std::vector<std::shared_ptr<Airport> > >::deserialize(&decoder)) {
         allAirports[airport->getCode()] = airport;
     }
 }
 
 TravelAgency::~TravelAgency() {
-    for (const Booking *booking: allBookings) {
-        delete booking;
-    }
-    for (const Customer *customer: allCustomers) {
-        delete customer;
-    }
-    for (const Travel *travel: allTravels) {
-        delete travel;
-    }
     allBookings.clear();
     allCustomers.clear();
     allTravels.clear();
@@ -121,55 +111,52 @@ std::string TravelAgency::readFile(const std::string &name) {
     if (!file.is_open()) {
         throw std::runtime_error("file not found");
     }
-    std::vector<Booking *> bookings;
-    std::vector<Customer *> customers;
-    std::vector<Travel *> travels;
+    std::vector<std::shared_ptr<Booking> > bookings;
+    std::vector<std::shared_ptr<Customer> > customers;
+    std::vector<std::shared_ptr<Travel> > travels;
 
     int objCount = 0;
     for (const json data = json::parse(file); json obj: data) {
         objCount++;
         auto decoder = new serde::json::JsonDecoder(obj);
         try {
-            auto booking = serde_objects::Codec<Booking *>::deserialize(decoder);
+            auto booking = serde_objects::Codec<std::shared_ptr<Booking>>::deserialize(decoder);
             bookings.push_back(booking);
 
             auto travelId = decoder->at<const long>("travelId");
-            auto travel = std::ranges::find_if(travels, [&travelId](const Travel *travel) {
+            auto travel = std::ranges::find_if(travels, [&travelId](const std::shared_ptr<Travel> travel) {
                 return travel->getId() == travelId;
             });
 
-            Travel *travelObj = nullptr;
+            std::optional<std::shared_ptr<Travel>> travelObj = std::nullopt;
 
             if (travel == travels.end()) {
-                travelObj = serde_objects::Codec<Travel *>::deserialize(decoder);
-                travels.push_back(travelObj);
+                travelObj = serde_objects::Codec<std::shared_ptr<Travel>>::deserialize(decoder);
+                travels.push_back(travelObj.value());
             } else {
                 travelObj = *travel;
             }
 
-            travelObj->addBooking(booking);
+            travelObj.value()->addBooking(booking);
 
             auto customerId = decoder->at<const long>("customerId");
-            auto customer = std::ranges::find_if(customers, [&customerId](const Customer *customer) {
+            auto customer = std::ranges::find_if(customers, [&customerId](const std::shared_ptr<Customer> customer) {
                 return customer->getId() == customerId;
             });
 
-            Customer *customerObj = nullptr;
+            std::optional<std::shared_ptr<Customer>> customerObj = std::nullopt;
 
             if (customer == customers.end()) {
-                customerObj = serde_objects::Codec<Customer *>::deserialize(decoder);
-                customers.push_back(customerObj);
+                customerObj = serde_objects::Codec<std::shared_ptr<Customer>>::deserialize(decoder);
+                customers.push_back(customerObj.value());
             } else {
                 customerObj = *customer;
             }
 
-            customerObj->addTravel(travelObj);
+            customerObj.value()->addTravel(travelObj.value());
         } catch (const std::exception &e) {
             std::stringstream out;
             out << "Error while parsing JSON for object " << objCount << ": " << e.what();
-            for (auto &booking: bookings) {
-                delete booking;
-            }
             throw std::runtime_error(out.str());
         }
         delete decoder;
@@ -188,14 +175,14 @@ void TravelAgency::printBookings() const {
     }
 }
 
-std::vector<Booking *> &TravelAgency::getBookings() {
+std::vector<std::shared_ptr<Booking> > &TravelAgency::getBookings() {
     return this->allBookings;
 }
 
-std::optional<Booking *> TravelAgency::findBooking(const std::string &id) {
+std::optional<std::shared_ptr<Booking> > TravelAgency::findBooking(const std::string &id) {
     const auto el = std::ranges::find_if(
         allBookings,
-        [&id](Booking *booking) {
+        [&id](const std::shared_ptr<Booking> &booking) {
             return booking->getId() == id;
         }
     );
@@ -205,10 +192,10 @@ std::optional<Booking *> TravelAgency::findBooking(const std::string &id) {
     return *el;
 }
 
-std::optional<Customer *> TravelAgency::findCustomer(long id) {
+std::optional<std::shared_ptr<Customer> > TravelAgency::findCustomer(long id) {
     const auto el = std::ranges::find_if(
         allCustomers,
-        [&id](Customer *customer) {
+        [&id](const std::shared_ptr<Customer> &customer) {
             return customer->getId() == id;
         }
     );
@@ -219,10 +206,10 @@ std::optional<Customer *> TravelAgency::findCustomer(long id) {
     return *el;
 }
 
-std::optional<Travel *> TravelAgency::findTravel(long id) {
+std::optional<std::shared_ptr<Travel> > TravelAgency::findTravel(long id) {
     const auto el = std::ranges::find_if(
         allTravels,
-        [&id](const Travel *travel) {
+        [&id](const std::shared_ptr<Travel> &travel) {
             return travel->getId() == id;
         }
     );
@@ -234,9 +221,16 @@ std::optional<Travel *> TravelAgency::findTravel(long id) {
     return *el;
 }
 
-void TravelAgency::writeFile(const std::string &fileName) {
+std::optional<std::shared_ptr<Airport> > TravelAgency::getAirport(const std::string &code) {
+    if (const auto it = allAirports.find(code); it != allAirports.end()) {
+        return it->second;
+    }
+    return std::nullopt;
+}
+
+void TravelAgency::writeFile(const std::string &fileName) const {
     nlohmann::json data;
-    for (auto customer : allCustomers) {
+    for (auto customer: allCustomers) {
         customer->serializeAll(data);
     }
 

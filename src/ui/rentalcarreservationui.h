@@ -17,7 +17,7 @@ class RentalCarReservationUi : public QWidget {
 Q_OBJECT
 
 public:
-    explicit RentalCarReservationUi(RentalCarReservation *res, ChangeController *changeController, QWidget *parent = nullptr);
+    explicit RentalCarReservationUi(const std::shared_ptr<RentalCarReservation> &res, const std::shared_ptr<BookingController> &changeController, QWidget *parent = nullptr);
     ~RentalCarReservationUi() override;
 
 public slots:
@@ -30,8 +30,8 @@ public slots:
 
 private:
     Ui::RentalCarReservationUi *ui;
-    RentalCarReservation *res;
-    ChangeController *changeController;
+    std::shared_ptr<RentalCarReservation> res;
+    std::shared_ptr<BookingController> changeController;
 };
 
 

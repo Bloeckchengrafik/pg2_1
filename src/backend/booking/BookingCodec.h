@@ -6,9 +6,9 @@
 #include "TrainTicket.h"
 #include "../../serde/prelude.h"
 
-template<> struct serde_objects::Codec<Booking*> {
-    static void serialize(Booking* &obj, serde::Encoder *encoder);
-    static Booking* deserialize(serde::Decoder *decoder);
+template<> struct serde_objects::Codec<std::shared_ptr<Booking>> {
+    static void serialize(std::shared_ptr<Booking> &obj, serde::Encoder *encoder);
+    static std::shared_ptr<Booking> deserialize(serde::Decoder *decoder);
 };
 
-void serializeBooking(Booking *booking, serde::Encoder *encoder, nlohmann::json &json);
+void serializeBooking(std::shared_ptr<Booking> booking, serde::Encoder *encoder, nlohmann::json &json);

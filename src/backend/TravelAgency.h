@@ -8,13 +8,13 @@
 #include "coord/Airport.h"
 
 class TravelAgency {
-    std::vector<Booking *> allBookings{};
-    std::vector<Customer *> allCustomers{};
-    std::vector<Travel *> allTravels{};
+    std::vector<std::shared_ptr<Booking>> allBookings{};
+    std::vector<std::shared_ptr<Customer>> allCustomers{};
+    std::vector<std::shared_ptr<Travel>> allTravels{};
     std::map<std::string, std::shared_ptr<Airport>> allAirports{};
 
-    void mergeWith(const std::vector<Booking *> &vector, const std::vector<Customer *> &customers,
-                   const std::vector<Travel *> &travels);
+    void mergeWith(const std::vector<std::shared_ptr<Booking>> &vector, const std::vector<std::shared_ptr<Customer>> &customers,
+                   const std::vector<std::shared_ptr<Travel>> &travels);
 
 public:
     TravelAgency();
@@ -25,13 +25,16 @@ public:
 
     void printBookings() const;
 
-    std::vector<Booking *> &getBookings();
+    std::vector<std::shared_ptr<Booking>> &getBookings();
 
-    std::optional<Booking *> findBooking(const std::string &id);
+    std::optional<std::shared_ptr<Booking>> findBooking(const std::string &id);
 
-    std::optional<Customer *> findCustomer(long id);
+    std::optional<std::shared_ptr<Customer>> findCustomer(long id);
 
-    std::optional<Travel *> findTravel(long id);
+    std::optional<std::shared_ptr<Travel>> findTravel(long id);
 
-    void writeFile(const std::string & fileName);
+    std::optional<std::shared_ptr<Airport>> getAirport(const std::string &code);
+
+    void writeFile(const std::string & fileName) const;
+
 };

@@ -39,7 +39,7 @@ public:
 
     std::string showDetails() override;
 
-    void showEditor(ChangeController *changeController) override;
+    void showEditor(std::shared_ptr<BookingController> changeController) override;
 
     std::string &getHotel();
 
@@ -56,7 +56,7 @@ public:
     void setTown(std::string town);
 };
 
-template<> struct serde_objects::Codec<HotelBooking*> {
-    static void serialize(HotelBooking* &obj, serde::Encoder *encoder);
-    static HotelBooking* deserialize(serde::Decoder *decoder);
+template<> struct serde_objects::Codec<std::shared_ptr<HotelBooking>> {
+    static void serialize(std::shared_ptr<HotelBooking> &obj, serde::Encoder *encoder);
+    static std::shared_ptr<HotelBooking> deserialize(serde::Decoder *decoder);
 };
