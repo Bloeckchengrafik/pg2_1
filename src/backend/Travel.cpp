@@ -29,7 +29,21 @@ bool Travel::operator==(const Travel &other) const {
     return this->id == other.id;
 }
 
-std::string Travel::getStart() {
+std::optional<QDate> Travel::getStart() {
+    if (travelBookings.empty()) {
+        return std::nullopt;
+    }
+    const auto min = std::ranges::min_element(
+        travelBookings.begin(), travelBookings.end(),
+        [](std::shared_ptr<Booking> a, std::shared_ptr<Booking> b) {
+            return parseDate(a->getFromDate()) < parseDate(b->getFromDate());
+        }
+    );
+
+    return parseDate((*min)->getFromDate());
+}
+
+std::string Travel::getStartString() {
     if (travelBookings.empty()) {
         return "";
     }
@@ -43,7 +57,22 @@ std::string Travel::getStart() {
     return formatDate((*min)->getFromDate());
 }
 
-std::string Travel::getEnd() {
+std::optional<QDate> Travel::getEnd() {
+    if (travelBookings.empty()) {
+        return std::nullopt;
+    }
+    const auto max = std::ranges::max_element(
+        travelBookings.begin(), travelBookings.end(),
+        [](std::shared_ptr<Booking> a, std::shared_ptr<Booking> b) {
+            return parseDate(a->getFromDate()) < parseDate(b->getFromDate());
+        }
+    );
+
+    return parseDate((*max)->getFromDate());
+}
+
+
+std::string Travel::getEndString() {
     if (travelBookings.empty()) {
         return "";
     }

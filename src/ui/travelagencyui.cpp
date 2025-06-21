@@ -10,8 +10,11 @@
 #include "ui_travelagencyui.h"
 
 TravelAgencyUi::TravelAgencyUi(std::shared_ptr<TravelAgency> agency, QWidget *parent)
-    : QMainWindow(parent)
-      , ui(new Ui::TravelAgencyUi), mapView(new GeoJsonView(this)), agency(std::move(agency)) {
+    : QMainWindow(parent),
+      ui(new Ui::TravelAgencyUi),
+      mapView(new GeoJsonView(this)),
+      check(std::make_unique<Check>(agency)),
+      agency(agency) {
     ui->setupUi(this);
 
     connect(ui->actionReadFile, &QAction::triggered,
@@ -29,6 +32,9 @@ TravelAgencyUi::TravelAgencyUi(std::shared_ptr<TravelAgency> agency, QWidget *pa
     connect(ui->actionSave, &QAction::triggered,
             this, &TravelAgencyUi::onSave);
 
+    connect(this, &TravelAgencyUi::somethingChanged,
+            this, &TravelAgencyUi::checkAll);
+
     clearUi();
     ui->actionSave->setEnabled(false);
     const auto layout = new QVBoxLayout(ui->uiFrame);
@@ -42,6 +48,7 @@ TravelAgencyUi::~TravelAgencyUi() {
 void TravelAgencyUi::onChange() {
     allowSave = true;
     ui->actionSave->setEnabled(true);
+    emit somethingChanged();
 }
 
 std::optional<std::shared_ptr<Airport> > TravelAgencyUi::getAirport(std::string &code) {
@@ -153,6 +160,18 @@ void TravelAgencyUi::onDblClickBooking(const int row, const int) {
     displayBooking(booking);
 }
 
+void TravelAgencyUi::checkAll() {
+    const auto result = (*check)();
+    if (!result.has_value()) return;
+    const auto &error = result.value();
+
+    const QString message = QString("Customer %1 has overlapping travels: %2 and %3")
+            .arg(error.getCustomer())
+            .arg(error.getTravelA())
+            .arg(error.getTravelB());
+    QMessageBox::warning(this, "Travel Conflict", message);
+}
+
 void TravelAgencyUi::clearUi() {
     ui->customerBox->hide();
     ui->groupTravel->hide();
@@ -177,8 +196,8 @@ void TravelAgencyUi::displayCustomer(const std::shared_ptr<Customer> &customer) 
     int row = 0;
     for (const auto &travel: customer->getTravels()) {
         table->setItem(row, 0, new QTableWidgetItem(QString::number(travel->getId())));
-        table->setItem(row, 1, new QTableWidgetItem(QString::fromStdString(travel->getStart())));
-        table->setItem(row, 2, new QTableWidgetItem(QString::fromStdString(travel->getEnd())));
+        table->setItem(row, 1, new QTableWidgetItem(QString::fromStdString(travel->getStartString())));
+        table->setItem(row, 2, new QTableWidgetItem(QString::fromStdString(travel->getEndString())));
         row++;
     }
     table->resizeColumnsToContents();

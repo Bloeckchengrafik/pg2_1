@@ -27,6 +27,8 @@ public:
 
     std::vector<std::shared_ptr<Booking>> &getBookings();
 
+    std::vector<std::shared_ptr<Customer>>& getCustomers();
+
     std::optional<std::shared_ptr<Booking>> findBooking(const std::string &id);
 
     std::optional<std::shared_ptr<Customer>> findCustomer(long id);
@@ -36,5 +38,4 @@ public:
     std::optional<std::shared_ptr<Airport>> getAirport(const std::string &code);
 
     void writeFile(const std::string & fileName) const;
-
 };

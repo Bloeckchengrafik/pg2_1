@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QtWidgets/QTableView>
 
+#include "../backend/Check.h"
 #include "../backend/TravelAgency.h"
 #include "../geojson/geojsonview.h"
 
@@ -25,6 +26,9 @@ public:
     void onChange() override;
     std::optional<std::shared_ptr<Airport>> getAirport(std::string &code) override;
 
+signals:
+    void somethingChanged();
+
 private slots:
     void onSave();
     void onReadInFile();
@@ -32,9 +36,12 @@ private slots:
     void onDblClickTravel(int row, int);
     void onDblClickBooking(int row, int);
 
+    void checkAll();
+
 private:
     Ui::TravelAgencyUi *ui;
     GeoJsonView *mapView;
+    std::unique_ptr<Check> check;
     std::shared_ptr<TravelAgency> agency;
     std::optional<std::shared_ptr<Customer>> selectedCustomer;
     std::optional<std::shared_ptr<Travel>> selectedTravel;

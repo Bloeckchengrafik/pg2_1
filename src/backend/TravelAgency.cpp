@@ -179,6 +179,10 @@ std::vector<std::shared_ptr<Booking> > &TravelAgency::getBookings() {
     return this->allBookings;
 }
 
+std::vector<std::shared_ptr<Customer>> & TravelAgency::getCustomers() {
+    return this->allCustomers;
+}
+
 std::optional<std::shared_ptr<Booking> > TravelAgency::findBooking(const std::string &id) {
     const auto el = std::ranges::find_if(
         allBookings,

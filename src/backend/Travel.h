@@ -24,9 +24,11 @@ public:
 
     bool operator==(const Travel &other) const;
 
-    std::string getStart();
+    std::optional<QDate> getStart();
+    std::string getStartString();
 
-    std::string getEnd();
+    std::optional<QDate> getEnd();
+    std::string getEndString();
 
     void serializeAll(nlohmann::json &json, serde::Encoder* encoder);
 
