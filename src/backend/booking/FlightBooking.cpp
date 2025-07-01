@@ -37,12 +37,14 @@ BookingClass serde_objects::Codec<BookingClass>::deserialize(serde::Decoder *dec
 
 FlightBooking::FlightBooking(
     const std::string &id, const double price, const std::string &fromDate,
-    const std::string &toDate, std::string fromDestination, std::string toDestination,
+    const std::string &toDate,
+    std::vector<std::string> predecessors,
+    std::string fromDestination, std::string toDestination,
     std::string airline, BookingClass bookingClass,
     FromDestPosition from,
     ToDestPosition to
 )
-    : Booking(id, price, fromDate, toDate),
+    : Booking(id, price, fromDate, toDate, predecessors),
       fromDestination(std::move(fromDestination)), fromDestinationPosition(from),
       toDestination(std::move(toDestination)), toDestinationPosition(to),
       airline(std::move(airline)),
@@ -93,7 +95,7 @@ BookingClass &FlightBooking::getBookingClass() {
     return bookingClass;
 }
 
-void FlightBooking::intoGeoJsonElements(std::vector<std::unique_ptr<GeoJsonElement>> &vector) {
+void FlightBooking::intoGeoJsonElements(std::vector<std::unique_ptr<GeoJsonElement> > &vector) {
     vector.push_back(GeoJsonPin::pin(this->fromDestination, this->fromDestinationPosition));
     vector.push_back(GeoJsonPin::pin(this->toDestination, this->toDestinationPosition));
     vector.push_back(GeoJsonLine::polyLine({
@@ -111,6 +113,7 @@ std::string FlightBooking::showDetails() {
             << this->toDestination
             << " mit " << this->airline
             << " am " << formatDate(this->fromDate)
+            << " bis zum " << formatDate(this->toDate)
             << ". Preis: " << this->price << " Euro";
 
     return out.str();
@@ -120,7 +123,8 @@ void FlightBooking::showEditor(std::shared_ptr<BookingController> changeControll
     (new FlightBookingUi(std::static_pointer_cast<FlightBooking>(shared_from_this()), changeController))->show();
 }
 
-void serde_objects::Codec<std::shared_ptr<FlightBooking>>::serialize(std::shared_ptr<FlightBooking> &obj, serde::Encoder *encoder) {
+void serde_objects::Codec<std::shared_ptr<FlightBooking> >::serialize(std::shared_ptr<FlightBooking> &obj,
+                                                                      serde::Encoder *encoder) {
     encoder->encode<const std::string>("id", obj->getId())
             .encode<const double>("price", obj->getPrice())
             .encode<const std::string>("fromDate", obj->getFromDate())
@@ -132,14 +136,17 @@ void serde_objects::Codec<std::shared_ptr<FlightBooking>>::serialize(std::shared
 
     obj->getFromDestPosition().serialize(encoder);
     obj->getToDestPosition().serialize(encoder);
+    serializePredecessors(encoder, obj->getPredecessors());
 }
 
-std::shared_ptr<FlightBooking> serde_objects::Codec<std::shared_ptr<FlightBooking>>::deserialize(serde::Decoder *decoder) {
+std::shared_ptr<FlightBooking> serde_objects::Codec<std::shared_ptr<FlightBooking> >::deserialize(
+    serde::Decoder *decoder) {
     return std::make_shared<FlightBooking>(
         decoder->at<std::string>("id", {serde::validate::assertNotEmpty("ID cannot be empty")}),
         decoder->at<double>("price", {serde::validate::assertNotNan("Price cannot be NaN")}),
         decoder->at<std::string>("fromDate", {serde::validate::assertNotEmpty("From date cannot be empty")}),
         decoder->at<std::string>("toDate", {serde::validate::assertNotEmpty("To date cannot be empty")}),
+        deserializePredecessors(decoder),
         decoder->at<std::string>("fromDest", {
                                      serde::validate::assertNotEmpty("From destination cannot be empty"),
                                      serde::validate::assertLength(3, "From destination must be 3 characters")

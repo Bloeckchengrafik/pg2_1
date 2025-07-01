@@ -31,6 +31,7 @@ public:
         const double price,
         const std::string &fromDate,
         const std::string &toDate,
+        std::vector<std::string> predecessors,
         std::string hotel,
         std::string town,
         RoomType roomType,

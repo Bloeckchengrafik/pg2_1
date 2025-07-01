@@ -35,6 +35,7 @@ private slots:
     void onSearchId();
     void onDblClickTravel(int row, int);
     void onDblClickBooking(int row, int);
+    void onOpenConfig() const;
 
     void checkAll();
 

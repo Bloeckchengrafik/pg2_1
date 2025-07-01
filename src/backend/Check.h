@@ -5,26 +5,19 @@
 
 class CheckError {
     int customer;
-    int travelA;
-    int travelB;
+    std::string message;
 
 public:
-    CheckError(const int customer, const int travel_a, const int travel_b)
-        : customer(customer),
-          travelA(travel_a),
-          travelB(travel_b) {
+    CheckError(const int customer, const std::string &message)
+        : customer(customer), message(message) {
     }
 
     int getCustomer() const {
         return customer;
     }
 
-    int getTravelA() const {
-        return travelA;
-    }
-
-    int getTravelB() const {
-        return travelB;
+    std::string getMessage() const {
+        return message;
     }
 };
 
@@ -34,8 +27,11 @@ class Check {
 public:
     explicit Check(const std::shared_ptr<TravelAgency> &agency);
 
-    std::optional<CheckError> operator()();
+    std::vector<CheckError> operator()();
 
 private:
     bool checkTravelsDisjunct(std::shared_ptr<Travel> travelA, std::shared_ptr<Travel> travelB);
+    bool checkNoMissingHotels(std::shared_ptr<Travel> travel);
+    bool checkNoOverlappingHotels(std::shared_ptr<Travel> travel);
+    bool checkNoOverlappingRentalCars(std::shared_ptr<Travel> travel);
 };

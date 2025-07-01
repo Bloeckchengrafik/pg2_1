@@ -54,14 +54,14 @@ TicketConnectingStation serde_objects::Codec<TicketConnectingStation>::deseriali
 }
 
 TrainTicket::TrainTicket(const std::string &id, const double price, const std::string &fromDate,
-                         const std::string &toDate, std::string arrivalTime, std::string departureTime,
-                         std::string fromStation,
-                         std::string toStation,
+                         const std::string &toDate, std::vector<std::string> predecessors,
+                         std::string arrivalTime, std::string departureTime,
+                         std::string fromStation, std::string toStation,
                          const std::vector<TicketConnectingStation> &connectingStations,
                          TicketType type,
                          TrainStationFromPosition fromStationPosition,
                          TrainStationToPosition toStationPosition
-): Booking(id, price, fromDate, toDate),
+): Booking(id, price, fromDate, toDate, predecessors),
    fromStation(std::move(fromStation)),
    toStation(std::move(toStation)),
    arrivalTime(std::move(arrivalTime)),
@@ -190,6 +190,7 @@ void serde_objects::Codec<std::shared_ptr<TrainTicket> >::serialize(std::shared_
 
     obj->getFromStationPosition().serialize(encoder);
     obj->getToStationPosition().serialize(encoder);
+    serializePredecessors(encoder, obj->getPredecessors());
 }
 
 std::shared_ptr<TrainTicket> serde_objects::Codec<std::shared_ptr<TrainTicket> >::deserialize(serde::Decoder *decoder) {
@@ -198,6 +199,7 @@ std::shared_ptr<TrainTicket> serde_objects::Codec<std::shared_ptr<TrainTicket> >
         decoder->at<double>("price", {serde::validate::assertNotNan("Price cannot be NaN")}),
         decoder->at<std::string>("fromDate", {serde::validate::assertNotEmpty("From date cannot be empty")}),
         decoder->at<std::string>("toDate", {serde::validate::assertNotEmpty("To date cannot be empty")}),
+        deserializePredecessors(decoder),
         decoder->at<std::string>("arrivalTime", {serde::validate::assertNotEmpty("Arrival time cannot be empty")}),
         decoder->at<std::string>("departureTime", {serde::validate::assertNotEmpty("Departure time cannot be empty")}),
         decoder->at<std::string>("fromStation", {serde::validate::assertNotEmpty("From station cannot be empty")}),

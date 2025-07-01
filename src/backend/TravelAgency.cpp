@@ -97,6 +97,8 @@ TravelAgency::TravelAgency() {
          serde_objects::Codec<std::vector<std::shared_ptr<Airport> > >::deserialize(&decoder)) {
         allAirports[airport->getCode()] = airport;
     }
+
+    checkConfigController = std::make_shared<CheckConfigurationController>();
 }
 
 TravelAgency::~TravelAgency() {
@@ -241,4 +243,8 @@ void TravelAgency::writeFile(const std::string &fileName) const {
     std::string jsonData = data.dump(4);
     std::ofstream file(fileName);
     file << jsonData;
+}
+
+std::shared_ptr<CheckConfigurationController> TravelAgency::getCheckConfigController() {
+    return checkConfigController;
 }

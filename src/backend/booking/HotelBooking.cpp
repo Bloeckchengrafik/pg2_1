@@ -34,9 +34,10 @@ RoomType serde_objects::Codec<RoomType>::deserialize(serde::Decoder *decoder) {
 }
 
 HotelBooking::HotelBooking(const std::string &id, const double price, const std::string &fromDate,
-                           const std::string &toDate, std::string hotel, std::string town,
+                           const std::string &toDate, std::vector<std::string> predecessors,
+                           std::string hotel, std::string town,
                            RoomType type, HotelPosition pos)
-    : Booking(id, price, fromDate, toDate),
+    : Booking(id, price, fromDate, toDate, predecessors),
       hotel(std::move(hotel)),
       town(std::move(town)), roomType(type), position(pos) {
 }
@@ -49,7 +50,7 @@ std::string &HotelBooking::getTown() {
     return town;
 }
 
-HotelPosition & HotelBooking::getPosition() {
+HotelPosition &HotelBooking::getPosition() {
     return position;
 }
 
@@ -69,7 +70,7 @@ void HotelBooking::setTown(std::string town) {
     this->town = std::move(town);
 }
 
-void HotelBooking::intoGeoJsonElements(std::vector<std::unique_ptr<GeoJsonElement>> &vector) {
+void HotelBooking::intoGeoJsonElements(std::vector<std::unique_ptr<GeoJsonElement> > &vector) {
     vector.push_back(GeoJsonPin::pin("Hotel: " + this->hotel, this->position));
 }
 
@@ -94,7 +95,8 @@ void HotelBooking::showEditor(std::shared_ptr<BookingController> changeControlle
     (new HotelBookingUi(std::static_pointer_cast<HotelBooking>(shared_from_this()), changeController))->show();
 }
 
-void serde_objects::Codec<std::shared_ptr<HotelBooking> >::serialize(std::shared_ptr<HotelBooking> &obj, serde::Encoder *encoder) {
+void serde_objects::Codec<std::shared_ptr<HotelBooking> >::serialize(std::shared_ptr<HotelBooking> &obj,
+                                                                     serde::Encoder *encoder) {
     encoder->encode<const std::string>("id", obj->getId())
             .encode<const double>("price", obj->getPrice())
             .encode<const std::string>("fromDate", obj->getFromDate())
@@ -104,14 +106,17 @@ void serde_objects::Codec<std::shared_ptr<HotelBooking> >::serialize(std::shared
             .encode<RoomType>("roomType", obj->getRoomType());
 
     obj->getPosition().serialize(encoder);
+    serializePredecessors(encoder, obj->getPredecessors());
 }
 
-std::shared_ptr<HotelBooking> serde_objects::Codec<std::shared_ptr<HotelBooking>>::deserialize(serde::Decoder *decoder) {
+std::shared_ptr<HotelBooking> serde_objects::Codec<std::shared_ptr<
+    HotelBooking> >::deserialize(serde::Decoder *decoder) {
     return std::make_shared<HotelBooking>(
         decoder->at<std::string>("id", {serde::validate::assertNotEmpty("ID cannot be empty")}),
         decoder->at<double>("price", {serde::validate::assertNotNan("Price cannot be NaN")}),
         decoder->at<std::string>("fromDate", {serde::validate::assertNotEmpty("From date cannot be empty")}),
         decoder->at<std::string>("toDate", {serde::validate::assertNotEmpty("To date cannot be empty")}),
+        deserializePredecessors(decoder),
         decoder->at<std::string>("hotel", {serde::validate::assertNotEmpty("Hotel cannot be empty")}),
         decoder->at<std::string>("town", {serde::validate::assertNotEmpty("Town cannot be empty")}),
         decoder->at<RoomType>("roomType"),

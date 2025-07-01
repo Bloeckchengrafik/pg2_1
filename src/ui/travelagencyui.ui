@@ -164,6 +164,8 @@
    <addaction name="actionReadFile"/>
    <addaction name="actionSearch"/>
    <addaction name="actionSave"/>
+   <addaction name="actionCheckSettings"/>
+   <addaction name="actionRunCheck"/>
   </widget>
   <action name="actionReadFile">
    <property name="icon">
@@ -199,6 +201,28 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionCheckSettings">
+   <property name="icon">
+    <iconset theme="QIcon::ThemeIcon::DocumentProperties"/>
+   </property>
+   <property name="text">
+    <string>Check Settings</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionRunCheck">
+   <property name="icon">
+    <iconset theme="QIcon::ThemeIcon::DocumentSend"/>
+   </property>
+   <property name="text">
+    <string>Run Check</string>
    </property>
    <property name="menuRole">
     <enum>QAction::MenuRole::NoRole</enum>

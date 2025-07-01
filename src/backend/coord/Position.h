@@ -15,7 +15,7 @@ struct StringLiteral {
     }
 };
 
-template <StringLiteral LA, StringLiteral LO>
+template<StringLiteral LA, StringLiteral LO>
 struct Position {
     double latitude;
     double longitude;
@@ -26,13 +26,22 @@ struct Position {
     }
 
     static Position deserialize(serde::Decoder *decoder) {
-        return Position{
-            decoder->at<double>(LA.toString()),
-            decoder->at<double>(LO.toString())
-        };
+        try {
+            return Position{
+                decoder->at<double>(LA.toString()),
+                decoder->at<double>(LO.toString())
+            };
+        } catch (nlohmann::json::exception &) {
+            const std::string lat = decoder->at<std::string>(LA.toString());
+            const std::string lon = decoder->at<std::string>(LO.toString());
+            return Position{
+                std::stod(lat),
+                std::stod(lon)
+            };
+        }
     }
 
     std::pair<double, double> toPair() const {
-        return { latitude, longitude };
+        return {latitude, longitude};
     }
 };

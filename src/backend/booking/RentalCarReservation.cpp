@@ -6,12 +6,14 @@
 
 RentalCarReservation::RentalCarReservation(
     const std::string &id, const double price, const std::string &fromDate,
-    const std::string &toDate, std::string pickup_location,
+    const std::string &toDate,
+    std::vector<std::string> predecessors,
+    std::string pickup_location,
     std::string return_location,
     std::string company,
     PickupPosition pickupPosition,
     ReturnPosition returnPosition
-): Booking(id, price, fromDate, toDate),
+): Booking(id, price, fromDate, toDate, predecessors),
    pickupLocation(std::move(pickup_location)),
    returnLocation(std::move(return_location)),
    company(std::move(company)),
@@ -63,12 +65,15 @@ QIcon RentalCarReservation::getIcon() {
     return QIcon(":/icons/car-profile.svg");
 }
 
-void RentalCarReservation::intoGeoJsonElements(std::vector<std::unique_ptr<GeoJsonElement>> &vector) {
+void RentalCarReservation::intoGeoJsonElements(std::vector<std::unique_ptr<GeoJsonElement> > &vector) {
     if (this->pickupLocation == this->returnLocation) {
-        vector.push_back(GeoJsonPin::pin("Mietwagen @ " + this->company + ": " + this->pickupLocation, this->pickupPosition));
+        vector.push_back(GeoJsonPin::pin("Mietwagen @ " + this->company + ": " + this->pickupLocation,
+                                         this->pickupPosition));
     } else {
-        vector.push_back(GeoJsonPin::pin("Mietwagen @ " + this->company + ": " + this->pickupLocation, this->pickupPosition));
-        vector.push_back(GeoJsonPin::pin("Mietwagen @ " + this->company + ": " + this->returnLocation, this->returnPosition));
+        vector.push_back(GeoJsonPin::pin("Mietwagen @ " + this->company + ": " + this->pickupLocation,
+                                         this->pickupPosition));
+        vector.push_back(GeoJsonPin::pin("Mietwagen @ " + this->company + ": " + this->returnLocation,
+                                         this->returnPosition));
         vector.push_back(GeoJsonLine::polyLine({
             this->pickupPosition.toPair(),
             this->returnPosition.toPair()
@@ -91,10 +96,12 @@ std::string RentalCarReservation::showDetails() {
 }
 
 void RentalCarReservation::showEditor(std::shared_ptr<BookingController> changeController) {
-    (new RentalCarReservationUi(std::static_pointer_cast<RentalCarReservation>(shared_from_this()), changeController))->show();
+    (new RentalCarReservationUi(std::static_pointer_cast<RentalCarReservation>(shared_from_this()), changeController))->
+            show();
 }
 
-void serde_objects::Codec<std::shared_ptr<RentalCarReservation>>::serialize(std::shared_ptr<RentalCarReservation> &obj, serde::Encoder *encoder) {
+void serde_objects::Codec<std::shared_ptr<RentalCarReservation> >::serialize(
+    std::shared_ptr<RentalCarReservation> &obj, serde::Encoder *encoder) {
     encoder->encode<const std::string>("id", obj->getId())
             .encode<const double>("price", obj->getPrice())
             .encode<const std::string>("fromDate", obj->getFromDate())
@@ -105,16 +112,23 @@ void serde_objects::Codec<std::shared_ptr<RentalCarReservation>>::serialize(std:
 
     obj->getPickupPosition().serialize(encoder);
     obj->getReturnPosition().serialize(encoder);
+    serializePredecessors(encoder, obj->getPredecessors());
 }
 
-std::shared_ptr<RentalCarReservation> serde_objects::Codec<std::shared_ptr<RentalCarReservation>>::deserialize(serde::Decoder *decoder) {
+std::shared_ptr<RentalCarReservation> serde_objects::Codec<std::shared_ptr<RentalCarReservation> >::deserialize(
+    serde::Decoder *decoder) {
     return std::make_shared<RentalCarReservation>(
         decoder->at<std::string>("id", {serde::validate::assertNotEmpty("ID cannot be empty")}),
         decoder->at<double>("price", {serde::validate::assertNotNan("Price cannot be NaN")}),
         decoder->at<std::string>("fromDate", {serde::validate::assertNotEmpty("From date cannot be empty")}),
         decoder->at<std::string>("toDate", {serde::validate::assertNotEmpty("To date cannot be empty")}),
-        decoder->at<std::string>("pickupLocation", {serde::validate::assertNotEmpty("Pickup location cannot be empty")}),
-        decoder->at<std::string>("returnLocation", {serde::validate::assertNotEmpty("Return location cannot be empty")}),
+        deserializePredecessors(decoder),
+        decoder->at<std::string>("pickupLocation", {
+                                     serde::validate::assertNotEmpty("Pickup location cannot be empty")
+                                 }),
+        decoder->at<std::string>("returnLocation", {
+                                     serde::validate::assertNotEmpty("Return location cannot be empty")
+                                 }),
         decoder->at<std::string>("company", {serde::validate::assertNotEmpty("Company cannot be empty")}),
         PickupPosition::deserialize(decoder),
         ReturnPosition::deserialize(decoder)

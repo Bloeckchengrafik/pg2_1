@@ -64,11 +64,11 @@ std::optional<QDate> Travel::getEnd() {
     const auto max = std::ranges::max_element(
         travelBookings.begin(), travelBookings.end(),
         [](std::shared_ptr<Booking> a, std::shared_ptr<Booking> b) {
-            return parseDate(a->getFromDate()) < parseDate(b->getFromDate());
+            return parseDate(a->getToDate()) < parseDate(b->getToDate());
         }
     );
 
-    return parseDate((*max)->getFromDate());
+    return parseDate((*max)->getToDate());
 }
 
 
@@ -86,6 +86,14 @@ std::string Travel::getEndString() {
     return formatDate((*max)->getToDate());
 }
 
+std::shared_ptr<Graph<std::shared_ptr<Booking>, 100> > &Travel::getGraph() {
+    if (!graph.has_value()) {
+        buildGraph();
+    }
+
+    return *graph;
+}
+
 void Travel::serializeAll(nlohmann::json &json, serde::Encoder *encoder) {
     auto self = shared_from_this();
     serde_objects::Codec<std::shared_ptr<Travel> >::serialize(self, encoder);
@@ -99,6 +107,25 @@ void Travel::serializeAll(nlohmann::json &json, serde::Encoder *encoder) {
 
 void Travel::intoGeoJsonElements(std::vector<std::unique_ptr<GeoJsonElement> > &vector) {
     for (const auto booking: this->travelBookings) booking->intoGeoJsonElements(vector);
+}
+
+void Travel::buildGraph() {
+    graph = std::make_shared<Graph<std::shared_ptr<Booking>, MAX_BOOKINGS> >();
+
+    const auto editable = *graph;
+    int i = 0;
+    std::unordered_map<std::string, int> idMapping;
+    for (const auto travel_booking: travelBookings) {
+        editable->insertVertex(++i, travel_booking);
+        idMapping[travel_booking->getId()] = i;
+    }
+    for (const auto travel_booking: travelBookings) {
+        const int id = idMapping[travel_booking->getId()];
+        for (const auto predecessor: travel_booking->getPredecessors()) {
+            const int predecessorId = idMapping[predecessor];
+            editable->insertEdge(predecessorId, id);
+        }
+    }
 }
 
 void serde_objects::Codec<std::shared_ptr<Travel> >::serialize(std::shared_ptr<Travel> &obj, serde::Encoder *encoder) {

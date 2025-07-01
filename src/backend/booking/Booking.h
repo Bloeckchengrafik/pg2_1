@@ -17,14 +17,16 @@ protected:
     double price;
     std::string fromDate;
     std::string toDate;
+    std::vector<std::string> predecessors;
 
 public:
     Booking(
         std::string id,
         const double price,
         std::string fromDate,
-        std::string toDate
-    ) : id(std::move(id)), price(price), fromDate(std::move(fromDate)), toDate(std::move(toDate)) {
+        std::string toDate,
+        std::vector<std::string> predecessors
+    ) : id(std::move(id)), price(price), fromDate(std::move(fromDate)), toDate(std::move(toDate)), predecessors(std::move(predecessors)) {
     }
 
     virtual ~Booking() = default;
@@ -37,8 +39,12 @@ public:
     [[nodiscard]] std::string &getId();
     [[nodiscard]] std::string &getFromDate();
     [[nodiscard]] std::string &getToDate();
+    std::vector<std::string> &getPredecessors();
 
     void setPrice(double price);
     void setFromDate(std::string fromDate);
     void setToDate(std::string toDate);
 };
+
+void serializePredecessors(serde::Encoder *encoder, const std::vector<std::string> &predecessors);
+std::vector<std::string> deserializePredecessors(serde::Decoder *decoder);

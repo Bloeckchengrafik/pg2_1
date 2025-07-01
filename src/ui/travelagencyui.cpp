@@ -6,6 +6,8 @@
 #include <QMessageBox>
 #include <utility>
 
+#include "checkresultui.h"
+#include "checksettings.h"
 #include "../backend/TravelAgency.h"
 #include "ui_travelagencyui.h"
 
@@ -35,6 +37,12 @@ TravelAgencyUi::TravelAgencyUi(std::shared_ptr<TravelAgency> agency, QWidget *pa
     connect(this, &TravelAgencyUi::somethingChanged,
             this, &TravelAgencyUi::checkAll);
 
+    connect(ui->actionCheckSettings, &QAction::triggered,
+            this, &TravelAgencyUi::onOpenConfig);
+
+    connect(ui->actionRunCheck, &QAction::triggered,
+        this, &TravelAgencyUi::checkAll);
+
     clearUi();
     ui->actionSave->setEnabled(false);
     const auto layout = new QVBoxLayout(ui->uiFrame);
@@ -48,7 +56,6 @@ TravelAgencyUi::~TravelAgencyUi() {
 void TravelAgencyUi::onChange() {
     allowSave = true;
     ui->actionSave->setEnabled(true);
-    emit somethingChanged();
 }
 
 std::optional<std::shared_ptr<Airport> > TravelAgencyUi::getAirport(std::string &code) {
@@ -59,6 +66,8 @@ void TravelAgencyUi::onSave() {
     if (!allowSave) {
         return;
     }
+
+    emit somethingChanged();
 
     QFileDialog dialog(this);
     dialog.setWindowTitle("Save File");
@@ -160,16 +169,16 @@ void TravelAgencyUi::onDblClickBooking(const int row, const int) {
     displayBooking(booking);
 }
 
+void TravelAgencyUi::onOpenConfig() const {
+    const auto settings = new CheckSettings(agency->getCheckConfigController());
+    settings->show();
+}
+
 void TravelAgencyUi::checkAll() {
     const auto result = (*check)();
-    if (!result.has_value()) return;
-    const auto &error = result.value();
-
-    const QString message = QString("Customer %1 has overlapping travels: %2 and %3")
-            .arg(error.getCustomer())
-            .arg(error.getTravelA())
-            .arg(error.getTravelB());
-    QMessageBox::warning(this, "Travel Conflict", message);
+    if (result.size() == 0) return;
+    auto ui = new CheckResultUi(result, agency, nullptr);
+    ui->show();
 }
 
 void TravelAgencyUi::clearUi() {

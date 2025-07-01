@@ -52,3 +52,26 @@ void Booking::setToDate(std::string toDate) {
     this->toDate = std::move(toDate);
 }
 
+std::vector<std::string> & Booking::getPredecessors() {
+    return predecessors;
+}
+
+void serializePredecessors(serde::Encoder *encoder, const std::vector<std::string> &predecessors) {
+    int i = 0;
+    for (auto predecessor: predecessors) {
+        encoder->encode<const std::string>("predecessor" + std::to_string(++i), predecessor);
+    }
+}
+
+std::vector<std::string> deserializePredecessors(serde::Decoder *decoder) {
+    int i = 0;
+    std::vector<std::string> predecessors;
+    while (true) {
+        try {
+            std::string predecessor = decoder->key("predecessor" + std::to_string(++i))->decodeString();
+            predecessors.push_back(predecessor);
+        } catch ([[maybe_unused]] nlohmann::json::exception &e) {
+            return predecessors;
+        }
+    }
+}

@@ -20,6 +20,7 @@ public:
         const double price,
         const std::string &fromDate,
         const std::string &toDate,
+        std::vector<std::string> predecessors,
         std::string pickup_location,
         std::string return_location,
         std::string company,

@@ -3,12 +3,15 @@
 
 #include "booking/Booking.h"
 #include "../serde/prelude.h"
+#include "digraph/Graph.h"
 
+#define MAX_BOOKINGS 100
 
 class Travel final : public std::enable_shared_from_this<Travel>, public IntoGeoJsonElements{
     long id;
     long customerId;
     std::vector<std::shared_ptr<Booking> > travelBookings{};
+    std::optional<std::shared_ptr<Graph<std::shared_ptr<Booking>, MAX_BOOKINGS>>> graph{};
 
 public:
     Travel(const long id, const long customerId) : id(id), customerId(customerId) {
@@ -30,9 +33,14 @@ public:
     std::optional<QDate> getEnd();
     std::string getEndString();
 
+    std::shared_ptr<Graph<std::shared_ptr<Booking>, MAX_BOOKINGS>> &getGraph();
+
     void serializeAll(nlohmann::json &json, serde::Encoder* encoder);
 
     void intoGeoJsonElements(std::vector<std::unique_ptr<GeoJsonElement>> &vector) override;
+
+private:
+    void buildGraph();
 };
 
 template<>

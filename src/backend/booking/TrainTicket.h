@@ -49,6 +49,7 @@ public:
         const double price,
         const std::string &fromDate,
         const std::string &toDate,
+        std::vector<std::string> predecessors,
         std::string arrivalTime,
         std::string departureTime,
         std::string fromStation,

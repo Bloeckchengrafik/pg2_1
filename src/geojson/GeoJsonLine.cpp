@@ -11,7 +11,7 @@ void GeoJsonLine::writeInto(nlohmann::json &el) {
     el["type"] = "Feature";
     el["geometry"]["type"] = "LineString";
     el["geometry"]["coordinates"] = nlohmann::json::array();
-    for (const auto&[lat, lon] : points) {
+    for (const auto &[lat, lon] : points) {
         el["geometry"]["coordinates"].push_back({lon, lat});
     }
 
